@@ -92,10 +92,27 @@ for x in links:
     print("\nLink " + str(i) + ': ', links[x].initial,  links[x].final,  links[x].name,  links[x].content)
     i = i + 1
 
+
 # Transizioni
+#Formato: Automa, nome, input, output, rilevanza, osservabilità
 transizioni_file = open("Transizioni.txt", "r+")
 contenuto = transizioni_file.read()
-
 transizioni = contenuto.split("\n")
-print('\nTRANSIZIONI')
-print(transizioni)
+
+transs = {}
+i = 0
+for x in transizioni:
+    componente = transizioni[i].split(",")[0]
+    lato = transizioni[i].split(",")[1]
+    inpuuttrans = transizioni[i].split(",")[2]
+    outputtrans = transizioni[i].split(",")[3]
+    obs = transizioni[i].split(",")[5]
+    rel = transizioni[i].split(",")[4]
+    transs[i] = Transizione(componente, lato, inpuuttrans, outputtrans, obs, rel)
+    i = i + 1
+
+i = 1
+for x in links:
+    print("\nTransizione " + str(i) + ': ', transs[x].component,  transs[x].edge,  transs[x].input,  transs[x].output, transs[x].observability, transs[x].relevance)
+    i = i + 1
+
