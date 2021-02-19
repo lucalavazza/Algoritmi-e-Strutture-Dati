@@ -1,27 +1,32 @@
-#IMPORT VARI
+# IMPORT VARI
 from graphviz import Digraph
 
-#DEFINIZIONE DELLE CLASSI E DEI RELATIVI METODI
+
+# DEFINIZIONE DELLE CLASSI E DEI RELATIVI METODI
 class Automa:
     def __init__(self, name, states, edges, final_states):
         self.name = name
         self.states = states
         self.edges = edges
         self.final_states = final_states
-    def disegnaAutoma(self):
+        # questo metodo è da sistemare, ma devo cercare di capire come. Perchè considera ogni carattere della stringa come elemento.
+        # quindi, dato "20,21,t2a", considera x[1]=2, x[2]=0, x[3]=, e poi di nuovo per 21,
+
+    def disegnaAutoma(self, lati):
         fa = Digraph(self.name, filename="" + self.name + ".gv")
-        fa.attr(rankdir="LR", size="5,5")
+        fa.attr(rankdir="LR", size="8.5")
+        i = 0
         for x in self.edges:
-            print(x)
-            nodo_partenza = x[1]
-            nodo_uscita = x[2]
-            etichetta = x[3]
-            fa.edge(nodo_partenza, nodo_uscita, label=etichetta)
-        fa.view()  ##Perché non funziona brutto scemo!
-# Funziona, ma è necessario installare dei componenti aggiuntivi che siano in grado di mostrare l'output.
-# In particolare, nel caso (spero) tu abbia sotto Anaconda/Miniconda, basta digitare nella shell 'conda install python-graphviz'.
-# In questo modo installa quello che serve e poi i grafi si vedono senza problemi.
-# Ho trovato la soluzione qui: https://stackoverflow.com/questions/53347010/graphviz-throws-errors-calling-view-function
+            nodo_partenza = lati[i].split(',')[0]
+            nodo_destinazione = lati[i].split(',')[1]
+            etichetta = lati[i].split(',')[2]
+            fa.edge(nodo_partenza, nodo_destinazione, label=etichetta)
+            i = i + 1
+        fa.view()   ##Perché non funziona brutto scemo!
+                    # Funziona, ma è necessario installare dei componenti aggiuntivi che siano in grado di mostrare l'output.
+                    # In particolare, nel caso (spero) tu abbia sotto Anaconda/Miniconda, basta digitare nella shell 'conda install python-graphviz'.
+                    # In questo modo installa quello che serve e poi i grafi si vedono senza problemi.
+                    # Ho trovato la soluzione qui: https://stackoverflow.com/questions/53347010/graphviz-throws-errors-calling-view-function
 
 class Link:
     def __init__(self, initial, final, name, content):
@@ -30,71 +35,64 @@ class Link:
         self.name = name
         self.content = content
 
+
 class Transizione:
     def __init__(self, component, edge, input, output, observability, relevance):
         self.component = component
         self.edge = edge
-        self. input = input
+        self.input = input
         self.output = output
         self.observability = observability
         self.relevance = relevance
 
 
-#STRUMENTI DI IMPORT DEGLI ELEMENTI DA FILE TXT
+# STRUMENTI DI IMPORT DEGLI ELEMENTI DA FILE TXT
 
-#Automi
+
+# Automi
 automa_file = open(".\Automa.txt", "r+")
 contenuto = automa_file.read()
+singolo_automa = contenuto.split(" &\n")
 
-contenuto_automa = contenuto.split("\n")
-nome_automa = contenuto_automa[0]
-stati = contenuto_automa[1].split(",")
-stati_finali = contenuto_automa[2].split(",") # possono non esserci
-lati = contenuto_automa[3].split("|")
+automi = {}
+i = 0
+for x in singolo_automa:
+    contenuto_automa = singolo_automa[i].split("\n")
+    nome_automa = contenuto_automa[0]
+    stati = contenuto_automa[1].split(",")
+    stati_finali = contenuto_automa[2].split(",")  # possono non esserci
+    lati = contenuto_automa[3].split("|")
+    automi[i] = Automa(nome_automa, stati, lati, stati_finali)
+    i = i + 1
 
-print('AUTOMA')
-print(nome_automa)
-print(stati)
-print(lati)
-print(stati_finali)
+i = 1
+for x in automi:
+    print("\nAutoma " + str(i) + ': \n', "   Nome: ", automi[x].name, "\n    Stati: ",  automi[x].states, "\n    Lati: ", automi[x].edges, "\n    Stati terminali: ", automi[x].final_states)
+    automi[x].disegnaAutoma(lati)
+    i = i + 1
 
-c2 = Automa(nome_automa,stati,lati,stati_finali)
-c2.disegnaAutoma()
 
-#Link
+# Link
 link_file = open("Link.txt", "r+")
 contenuto = link_file.read()
+contenuto_link = contenuto.split("\n")
 
-contenuto_link1 = contenuto.split("\n")
-componente_iniziale1 = contenuto_link1[0].split(",")[0]
-componente_finale1 = contenuto_link1[0].split(",")[1]
-nome_link1 = contenuto_link1[0].split(",")[2]
-content1 = contenuto_link1[0].split(",")[3]
+links = {}
+i = 0
+for x in contenuto_link:
+    componente_iniziale = contenuto_link[i].split(",")[0]
+    componente_finale = contenuto_link[i].split(",")[1]
+    nome_link = contenuto_link[i].split(",")[2]
+    content = contenuto_link[i].split(",")[3]
+    links[i] = Link(componente_iniziale, componente_finale, nome_link, content)
+    i = i + 1
 
-componente_iniziale2 = contenuto_link1[1].split(",")[0]
-componente_finale2 = contenuto_link1[1].split(",")[1]
-nome_link2 = contenuto_link1[1].split(",")[2]
-content2 = contenuto_link1[1].split(",")[3]
+i = 1
+for x in links:
+    print("\nLink " + str(i) + ': ', links[x].initial,  links[x].final,  links[x].name,  links[x].content)
+    i = i + 1
 
-print('\nLINK')
-print(contenuto)
-print('\nLink 1')
-print(contenuto_link1[0])
-print(componente_iniziale1)
-print(componente_finale1)
-print(nome_link1)
-print(content1)
-print('\nLink 2')
-print(contenuto_link1[1])
-print(componente_iniziale2)
-print(componente_finale2)
-print(nome_link2)
-print(content2)
-
-l2=Link(componente_iniziale1,componente_finale1,nome_link1,content1)
-l3=Link(componente_iniziale2,componente_finale2,nome_link2,content2)
-
-#Transizioni
+# Transizioni
 transizioni_file = open("Transizioni.txt", "r+")
 contenuto = transizioni_file.read()
 

@@ -1,5 +1,5 @@
 digraph C2 {
-	rankdir=LR size="5,5"
-	0 -> "," [label=2]
-	1 -> "," [label=2]
+	rankdir=LR size=8.5
+	30 -> 31 [label=t3a]
+	31 -> 30 [label=t3b]
 }
