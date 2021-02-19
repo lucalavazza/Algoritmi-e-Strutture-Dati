@@ -21,6 +21,7 @@ class Automa:
 # Funziona, ma è necessario installare dei componenti aggiuntivi che siano in grado di mostrare l'output.
 # In particolare, nel caso (spero) tu abbia sotto Anaconda/Miniconda, basta digitare nella shell 'conda install python-graphviz'.
 # In questo modo installa quello che serve e poi i grafi si vedono senza problemi.
+# Ho trovato la soluzione qui: https://stackoverflow.com/questions/53347010/graphviz-throws-errors-calling-view-function
 
 class Link:
     def __init__(self, initial, final, name, content):
