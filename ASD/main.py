@@ -11,14 +11,24 @@ class Automa:
         self.edges = edges
         self.final_states = final_states
 
-    def disegnaAutoma(self, lati):
+    def disegnaAutoma(self, lati, final_states):
         fa = Digraph(self.name, filename="" + self.name + ".gv")
         fa.attr(rankdir="LR", size="8.5")
+        fa.attr('node', shape='circle')
         i = 0
         for x in self.edges:
             nodo_partenza = lati[i].split(',')[0]
             nodo_destinazione = lati[i].split(',')[1]
+
+            if nodo_partenza in final_states:
+                fa.attr('node', shape='doublecircle')
+                fa.node(nodo_partenza)
+            if nodo_destinazione in final_states:
+                fa.attr('node', shape='doublecircle')
+                fa.node(nodo_destinazione)
+
             etichetta = lati[i].split(',')[2]
+            fa.attr('node', shape='circle')
             fa.edge(nodo_partenza, nodo_destinazione, label=etichetta)
             i = i + 1
         fa.view()
@@ -52,19 +62,75 @@ class Transizione:
         self.relevance = relevance
 
 
-class SpazioComportamentale:
-    def __init__(self, listaStati, listaLink):
+class StatoComportamentale:
+    def __init__(self, listaStati, listaLink, finale):
         self.listaStati = listaStati
         self.listaLink = listaLink
 
-    def cercaDoppioni(self, nuovaListaStati, nuovaListaLink):
-        for v in statoComportamentale:
-            print("Nodo in verifica: ", v.listaStati, v.listaLink)
-            if v.listaStati == nuovaListaStati:
-                if v.listaLink == nuovaListaLink:
-                    print("Nodo già esistente: ", v.listaStati, v.listaLink)
-                    return True
+    def isDuplicate(self, nuovaListaStati, nuovaListaLink):
+        # print("Nodo in verifica: ", nuovaListaStati, nuovaListaLink)
+        for v in stato_comportamentale:
+            # print("Verificando: ", v.listaStati, v.listaLink)
+            if v.listaStati == nuovaListaStati and v.listaLink == nuovaListaLink:
+                # print("Nodo già esistente: ", v.listaStati, v.listaLink)
+                return True
         return False
+
+    def cercaDoppione(self, nuovaListaStati, nuovaListaLink):
+        count = 0
+        for v in stato_comportamentale:
+            if v.listaStati == nuovaListaStati and v.listaLink == nuovaListaLink:
+                return count
+        return -1
+
+    def verificaSeStatoFinale(self, nuovaListaLink):
+        for link in nuovaListaLink:
+            if link != '\u03B5':
+                return False
+        return True
+
+
+class ArcoComportamentale:
+    def __init__(self, statoPartenza, statoDestinazione, etichetta):
+        self.statoPartenza = statoPartenza
+        self.statoDestinazione = statoDestinazione
+        self.etichetta = etichetta
+
+    def disegnaSpazioComportamentale(self, archi):
+        spazio_comportamentale = Digraph("Spazio Comportamentale", filename="SpazioComportamentale.gv")
+        spazio_comportamentale.attr(rankdir="LR", size="8.5")
+        spazio_comportamentale.attr("node", shape="circle")
+        for arco in archi:
+            finale = True
+            nodo_partenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink')
+            listaCollegamenti = getattr(arco.statoPartenza, 'listaLink')
+
+            for collegamento in listaCollegamenti:
+                if collegamento != '\u03B5':
+                    finale = False
+                    break
+            nodo_partenza = ' '.join(nodo_partenza)  # converto la lista in stringa
+            if finale:
+                spazio_comportamentale.attr('node', shape='doublecircle')
+                spazio_comportamentale.node(nodo_partenza)
+
+            finale = True
+            nodo_destinazione = getattr(arco.statoDestinazione, 'listaStati') + getattr(arco.statoDestinazione, 'listaLink')
+            listaCollegamenti = getattr(arco.statoDestinazione, 'listaLink')
+
+            for collegamento in listaCollegamenti:
+                if collegamento != '\u03B5':
+                    finale = False
+                    break
+            nodo_destinazione = ' '.join(nodo_destinazione)  # converto la lista in stringa
+            if finale:
+                spazio_comportamentale.attr('node', shape='doublecircle')
+                spazio_comportamentale.node(nodo_destinazione)
+
+            spazio_comportamentale.attr('node', shape='circle')
+            nomeEtichetta = arco.etichetta
+            spazio_comportamentale.edge(nodo_partenza, nodo_destinazione, label=nomeEtichetta)
+        spazio_comportamentale.view()
 
 
 # STRUMENTI DI IMPORT DEGLI ELEMENTI DA FILE TXT
@@ -87,14 +153,14 @@ for automa in lista_automi:
 
 # Richiamo della funzione per disegnare gli automi uno per volta
 for automa in automi:
-    automa.disegnaAutoma(automa.edges)
+    automa.disegnaAutoma(automa.edges, automa.final_states)
 
 # Link
 # Formato: comp_iniziale, comp_finale, link, contenuto
 link_file = open("Link.txt", "r+")
 contenuto = link_file.read()
 lista_link_inseriti = contenuto.split("\n")
-print(lista_link_inseriti)
+# print(lista_link_inseriti)
 links = []
 for link in lista_link_inseriti:
     componente_iniziale = link.split(",")[0]
@@ -131,87 +197,145 @@ for transizione in lista_transizioni:
 # Ogni stato dello spazio comportamentale è definito da: stati dei componenti + contenuto link
 # Creo il primo stato dello spazio comportamentale, che sarà dato dai primi stati dei componenti e dai link vuoti (CONTROLLARE SE SPECIFICATO DIVERSO NELLA RICHIESTA)
 lista_stati = []
-lista_link = []  # ricordarsi che qui ci sono i CONTENUTI dei link
-statoComportamentale = []
+lista_link = []  # ricordarsi che qui ci sono i CONTENUTI dei link, inoltre è un dictionary
+
+stato_comportamentale = []
+arco_comportamentale = []
 # faccio la lista di stati di partenza per il primo elemento dello spazio comportamentale
 for x in automi:
     statoPartenza = x.states[0]
     lista_stati.append(statoPartenza)
 
 for x in links:
-    ##ATTENZIONE, vanno messi i contenuti del file link non sempre vuoti
+    ##ATTENZIONE, sono sempre vuoti alla prima iterazione???
     lista_link.append('\u03B5')  # metto la epsilon per indicare che sono vuoti
 
+finale = True  # Bisogna capire se all'inizio è sempre così o no
+
 # A questo punto posso creare l'oggetto stato_comportamentale come la lista degli stati ed i contenuti dei link che lo definiscono
-statoComportamentale.append(SpazioComportamentale(lista_stati, lista_link))
-i = 0
-# fine = True;
-# while fine: #serve una funzione che confronti lo statoAttuale con il comportamentale
-for transizione in lista_transizioni:  # ciclo le transizioni
-    componente = transizione.component
-    lato = transizione.edge
-    soddisfa = True
-    pos_automa = 0
-    for automa in automi:  # cerco l'automa giusto
-        if componente == automa.name:  # trovo l'automa giusto
-            for l in automa.edges:  # cerco il lato giusto
-                if lato == l.split(',')[2]:  # trovo il lato giusto
-                    stato = statoComportamentale[i].listaStati[pos_automa]  # prendo lo stato dell'automa n-esimo nello stato comportamentale
-                    if stato == l.split(',')[0]:  # verifico che stato di partenza sia quello contenuto nel stato comportamentale attuale
-                        ingressi = (transizione.input).split(';')  # faccio la lista di tutti gli eventi; formato: link:evento
-                        for j in ingressi:  # ciclo tutti gli eventi in ingresso
-                            count = 0  # contatore (i link sono ordinati in un modo unico negli spazi comportamentali, questo mi serve per andare a quello relativo all'evento da confrontare
-                            for link in links:  # ciclo i link esistenti
-                                if j.split(':')[0] == link.name:  # verifico che il link i-esimo sia uguale a quello della transizione
-                                    if statoComportamentale[i].listaLink[count] != j.split(':')[1]:  # verifico che il contenuto del link in ingresso sia quello dello stato comportamentale
-                                        #print("Esco")
-                                        soddisfa = False
-                                        break
-                                count += 1
-                            # se tutto è stato soddisfatto non ho interrotto prima e quindi posso procedere
-                        if not soddisfa:
-                            break
-                        # costruisco un nuovo stato dello spazio comportamentale
-                        # faccio prima un backup delle liste
-                        nuova_lista_stati = lista_stati.copy()
-                        nuova_lista_link = lista_link.copy()
+stato_comportamentale.append(StatoComportamentale(lista_stati, lista_link, finale))
 
-                        stato = l.split(',')[1] # stato di destinazione
-                        nuova_lista_stati[pos_automa] = stato # Nella lista stati originaria sostituisco lo stato vecchio con quello nuovo
+i = 0  # numero di stati comportamentali
+iterazione = 0
+statoCambiato = True
+while statoCambiato:
+    statoCambiato = False
+    print("Iterazione: ", iterazione)
+    iterazione += 1
+    for transizione in lista_transizioni:  # ciclo le transizioni
+        componente = transizione.component
+        lato = transizione.edge
+        soddisfa = True
+        pos_automa = 0
 
-                        uscite = (transizione.output).split(';') # faccio la lista delle uscite
-                        for uscita in uscite:
-                            count = 0
-                            for link in links:
-                                if uscita.split(':')[0] == link.name:
-                                    nuova_lista_link[count] = uscita.split(':')[1]
-                                count += 1
+        for automa in automi:  # cerco l'automa giusto
+            if componente == automa.name:  # trovo l'automa giusto
+                for l in automa.edges:  # cerco il lato giusto
+                    if lato == l.split(',')[2]:  # trovo il lato giusto
+                        # prendo lo stato dell'automa n-esimo nello stato comportamentale
+                        stato = stato_comportamentale[i].listaStati[pos_automa]
+                        # verifico che stato di partenza sia quello contenuto nel stato comportamentale attuale
+                        if stato == l.split(',')[0]:
+                            # faccio la lista di tutti gli eventi; formato: link:evento
+                            ingressi = (transizione.input).split(';')
+                            for j in ingressi:  # ciclo tutti gli eventi in ingresso
+                                count = 0  # contatore (i link sono ordinati in un modo unico negli spazi comportamentali, questo mi serve per andare a quello relativo all'evento da confrontare
+                                for link in links:  # ciclo i link esistenti
+                                    # verifico che il link i-esimo sia uguale a quello della transizione
+                                    if j.split(':')[0] == link.name:
+                                        # verifico che il contenuto del link in ingresso sia quello dello stato comportamentale
+                                        if stato_comportamentale[i].listaLink[count] != j.split(':')[1]:
+                                            # print("Esco")
+                                            soddisfa = False
+                                            break
+                                    count += 1
+                                if not soddisfa:
+                                    break
+                            if soddisfa:
+                                uscite = (transizione.output).split(';')
+                                # verifica che i link su cui scrivere le uscite siano vuoti
+                                for k in uscite:
+                                    count = 0
+                                    for link in links:
+                                        if k.split(':')[0] == link.name:
+                                            # verifico che il link dove scrivere sia vuoto
+                                            if stato_comportamentale[i].listaLink[count] != '\u03B5':
+                                                soddisfa = False
+                                                break
+                                        count += 1
 
-                        # Verifico che il nuovo stato dello spazio comportamentale non esista già
-                        doppione = SpazioComportamentale.cercaDoppioni(statoComportamentale, nuova_lista_stati, nuova_lista_link)
-                        if doppione: # rimetto tutto a posto
+                                # se tutto è stato soddisfatto non ho interrotto prima e quindi posso procedere
+                            if not soddisfa:
+                                break
+                            # costruisco un nuovo stato dello spazio comportamentale
+                            # faccio prima un backup delle liste
                             nuova_lista_stati = lista_stati.copy()
                             nuova_lista_link = lista_link.copy()
-                            break
-                        else: # faccio il nuovo stato
-                            print("Nessun doppione trovato")
-                            i += 1
-                            print("Sto costruendo un nuovo stato: ", nuova_lista_stati, nuova_lista_link)
-                            statoComportamentale.append(SpazioComportamentale(nuova_lista_stati, nuova_lista_link))
-                            #statoComportamentale[i] = SpazioComportamentale(nuova_lista_stati, nuova_lista_link)
-                            break
+
+                            stato = l.split(',')[1]  # stato di destinazione
+                            # Nella lista stati originaria sostituisco lo stato vecchio con quello nuovo
+                            nuova_lista_stati[pos_automa] = stato
+                            # rimuovo gli eventi in ingresso dai link appositi
+                            print(ingressi)
+                            if ingressi: # sfrutto i booleani impliciti: una lista vuota è false
+                                for ingresso in ingressi:
+                                    count = 0
+                                    ingresso = ingresso.split(':')
+                                    for link in links:
+                                        # NON STA CONTROLLANDO GLI EVENTI IN INGRESSO...
+                                        if ingresso[0] == link.name: #and ingresso[1] == link.content:
+                                            print("L'ingresso mangia l'evento")
+                                            nuova_lista_link[count] = '\u03B5'
+                                        count += 1
+
+
+                            uscite = (transizione.output).split(';')  # faccio la lista delle uscite
+                            for uscita in uscite:
+                                count = 0
+                                for link in links:
+                                    if uscita.split(':')[0] == link.name:
+                                        nuova_lista_link[count] = uscita.split(':')[1]
+                                    count += 1
+
+                            # Verifico che il nuovo stato dello spazio comportamentale non esista già
+                            doppione = StatoComportamentale.isDuplicate(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
+
+                            if doppione:  # il nodo a cui posso muovermi esiste già
+                                # procedo a costruire l'arco che collegherà il nodo attuale a quello "doppione"
+                                finale = StatoComportamentale.verificaSeStatoFinale(stato_comportamentale, nuova_lista_link)
+                                print("Costruzione di solo arco in corso verso: ", nuova_lista_stati, nuova_lista_link)
+                                # devo trovare in che posto è lo stato doppione
+                                posizione_doppione = StatoComportamentale.cercaDoppione(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
+                                arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[posizione_doppione], transizione.edge))
+
+                                lista_stati = nuova_lista_stati.copy()
+                                lista_link = nuova_lista_link.copy()
+                                break
+                            else:  # faccio il nuovo stato
+                                statoCambiato = True
+                                # verifico se lo stato è o meno finale
+                                finale = StatoComportamentale.verificaSeStatoFinale(stato_comportamentale, nuova_lista_link)
+                                print("Nessun doppione trovato")
+                                i += 1
+                                print("Sto costruendo un nuovo stato: ", nuova_lista_stati, nuova_lista_link, finale)
+                                stato_comportamentale.append(StatoComportamentale(nuova_lista_stati, nuova_lista_link, finale))
+                                # Costruisco l'arco tra i due stati dello spazio comportamentale
+                                arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i - 1], stato_comportamentale[i], transizione.edge))
+                                lista_stati = nuova_lista_stati.copy()
+                                lista_link = nuova_lista_link.copy()
+                                break
+                    if not soddisfa:
+                        break
+
                 if not soddisfa:
                     break
-
             if not soddisfa:
                 break
-        if not soddisfa:
+            pos_automa += 1
+        print("Stati dello spazio comportamentale costruiti: ", i + 1)  # numero stati comportamentali creati fino a quel momento (parte da zero)
+        if statoCambiato:
             break
-        pos_automa += 1
-    print(i+1) # numero stati comportamentali creati fino a quel momento (parte da zero)
 
-    #break
-# verifico che lo statoattuale esiste già
-# se non esiste lo aggiungo
-# se esiste esco
-# fine = False
+# Disegno lo spazio comportamentale
+            print("È stato aggiunto un nuovo stato allo spazio comportamentale, ricomincio da capo con le transizioni")
+ArcoComportamentale.disegnaSpazioComportamentale(ArcoComportamentale, arco_comportamentale)
