@@ -275,18 +275,22 @@ while statoCambiato:
                             stato = l.split(',')[1]  # stato di destinazione
                             # Nella lista stati originaria sostituisco lo stato vecchio con quello nuovo
                             nuova_lista_stati[pos_automa] = stato
+
                             # rimuovo gli eventi in ingresso dai link appositi
-                            print(ingressi)
                             if ingressi: # sfrutto i booleani impliciti: una lista vuota è false
                                 for ingresso in ingressi:
                                     count = 0
-                                    ingresso = ingresso.split(':')
+                                    elemento_ingresso = ingresso.split(':')
+                                    # ciclo for di DEBUG, stavo controllando che la lista avesse gli elementi che dicevo
+                                    for paperino in range(len(elemento_ingresso)):
+                                        print(paperino, " ", end = "")
+                                        print(elemento_ingresso[paperino])
                                     for link in links:
                                         # NON STA CONTROLLANDO GLI EVENTI IN INGRESSO...
-                                        if ingresso[0] == link.name: #and ingresso[1] == link.content:
-                                            print("L'ingresso mangia l'evento")
+                                        if elemento_ingresso[0] == link.name and elemento_ingresso[1] == link.content:
                                             nuova_lista_link[count] = '\u03B5'
                                         count += 1
+                            print("Eventi in ingresso rimossi: ", nuova_lista_link)
 
 
                             uscite = (transizione.output).split(';')  # faccio la lista delle uscite
