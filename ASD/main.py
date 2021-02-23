@@ -99,6 +99,12 @@ class ArcoComportamentale:
         self.statoDestinazione = statoDestinazione
         self.etichetta = etichetta
 
+    def isDuplicate(self, statoPartenza, statoDestinazione, etichetta):
+        for v in arco_comportamentale:
+            if v.statoPartenza == statoPartenza and v.statoDestinazione == statoDestinazione and v.etichetta == etichetta:
+                return True
+        return False
+
     def disegnaSpazioComportamentale(self, archi):
         spazio_comportamentale = Digraph("Spazio Comportamentale", filename="SpazioComportamentale.gv")
         spazio_comportamentale.attr(rankdir="LR", size="8.5")
@@ -283,21 +289,17 @@ while statoCambiato:
                             nuova_lista_stati[pos_automa] = stato
 
                             # rimuovo gli eventi in ingresso dai link appositi
-                            if ingressi: # sfrutto i booleani impliciti: una lista vuota è false
+                            if ingressi[0] != '': # se il primo elemento è vuoto, la lista è vuota
                                 for ingresso in ingressi:
                                     count = 0
-                                    elemento_ingresso = ingresso.split(':')
-                                    # ciclo for di DEBUG, stavo controllando che la lista avesse gli elementi che dicevo
-                                    for paperino in range(len(elemento_ingresso)):
-                                        print(paperino, " ", end = "")
-                                        print(elemento_ingresso[paperino])
+                                    nomeLink = ingresso.split(':')[0]
+                                    valoreLink = ingresso.split(':')[1]
                                     for link in links:
                                         # NON STA CONTROLLANDO GLI EVENTI IN INGRESSO...
-                                        if elemento_ingresso[0] == link.name and elemento_ingresso[1] == link.content:
-                                            nuova_lista_link[count] = '\u03B5'
+                                        if nomeLink == link.name:
+                                            if valoreLink == nuova_lista_link[count]:
+                                                nuova_lista_link[count] = '\u03B5'
                                         count += 1
-                            print("Eventi in ingresso rimossi: ", nuova_lista_link)
-
 
                             uscite = (transizione.output).split(';')  # faccio la lista delle uscite
                             for uscita in uscite:
@@ -311,16 +313,23 @@ while statoCambiato:
                             doppione = StatoComportamentale.isDuplicate(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
 
                             if doppione:  # il nodo a cui posso muovermi esiste già
-                                # procedo a costruire l'arco che collegherà il nodo attuale a quello "doppione"
-                                finale = StatoComportamentale.verificaSeStatoFinale(stato_comportamentale, nuova_lista_link)
-                                print("Costruzione di solo arco in corso verso: ", nuova_lista_stati, nuova_lista_link)
-                                # devo trovare in che posto è lo stato doppione
-                                posizione_doppione = StatoComportamentale.cercaDoppione(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
-                                arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[posizione_doppione], transizione.edge))
+                                arcoDoppione = ArcoComportamentale.isDuplicate(arco_comportamentale, lista_stati + lista_link, nuova_lista_stati + nuova_lista_link, transizione.edge)
+                                if arcoDoppione:
+                                    # l'arco esiste già
+                                    lista_stati = nuova_lista_stati.copy()
+                                    lista_link = nuova_lista_link.copy()
+                                    break
+                                else:
+                                    # procedo a costruire l'arco che collegherà il nodo attuale a quello "doppione"
+                                    finale = StatoComportamentale.verificaSeStatoFinale(stato_comportamentale, nuova_lista_link)
+                                    print("Costruzione di solo arco in corso verso: ", nuova_lista_stati, nuova_lista_link)
+                                    # devo trovare in che posto è lo stato doppione
+                                    posizione_doppione = StatoComportamentale.cercaDoppione(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
+                                    arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[posizione_doppione], transizione.edge))
 
-                                lista_stati = nuova_lista_stati.copy()
-                                lista_link = nuova_lista_link.copy()
-                                break
+                                    lista_stati = nuova_lista_stati.copy()
+                                    lista_link = nuova_lista_link.copy()
+                                    break
                             else:  # faccio il nuovo stato
                                 statoCambiato = True
                                 # verifico se lo stato è o meno finale
