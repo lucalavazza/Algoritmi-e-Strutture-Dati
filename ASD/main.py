@@ -67,6 +67,7 @@ class StatoComportamentale:
         self.listaStati = listaStati
         self.listaLink = listaLink
 
+    # mi dice se uno stato comportamentale è una copia di un altro
     def isDuplicate(self, nuovaListaStati, nuovaListaLink):
         # print("Nodo in verifica: ", nuovaListaStati, nuovaListaLink)
         for v in stato_comportamentale:
@@ -76,6 +77,7 @@ class StatoComportamentale:
                 return True
         return False
 
+    # questo non ho capito (per ora).
     def cercaDoppione(self, nuovaListaStati, nuovaListaLink):
         count = 0
         for v in stato_comportamentale:
@@ -83,6 +85,7 @@ class StatoComportamentale:
                 return count
         return -1
 
+    # autoesplicativo
     def verificaSeStatoFinale(self, nuovaListaLink):
         for link in nuovaListaLink:
             if link != '\u03B5':
@@ -102,7 +105,7 @@ class ArcoComportamentale:
         spazio_comportamentale.attr("node", shape="circle")
         for arco in archi:
             finale = True
-            nodo_partenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink')
+            nodo_partenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink') #dello stato recupero prima gli stati e poi i link
             listaCollegamenti = getattr(arco.statoPartenza, 'listaLink')
 
             for collegamento in listaCollegamenti:
@@ -210,6 +213,9 @@ for x in links:
     ##ATTENZIONE, sono sempre vuoti alla prima iterazione???
     lista_link.append('\u03B5')  # metto la epsilon per indicare che sono vuoti
 
+# Le slide dicono: "Lo stato iniziale della rete è quello in cui ciascun componente è nel suo stato iniziale e i link sono vuoti"
+# Perciò dovrebbe essere corretto fatto così. Credo.
+
 finale = True  # Bisogna capire se all'inizio è sempre così o no
 
 # A questo punto posso creare l'oggetto stato_comportamentale come la lista degli stati ed i contenuti dei link che lo definiscono
@@ -222,7 +228,7 @@ while statoCambiato:
     statoCambiato = False
     print("Iterazione: ", iterazione)
     iterazione += 1
-    for transizione in lista_transizioni:  # ciclo le transizioni
+    for transizione in lista_transizioni:  # ciclo le transizioni e per ciascuna identifico componente e lato (es: C2, t2a)
         componente = transizione.component
         lato = transizione.edge
         soddisfa = True
@@ -239,7 +245,7 @@ while statoCambiato:
                             # faccio la lista di tutti gli eventi; formato: link:evento
                             ingressi = (transizione.input).split(';')
                             for j in ingressi:  # ciclo tutti gli eventi in ingresso
-                                count = 0  # contatore (i link sono ordinati in un modo unico negli spazi comportamentali, questo mi serve per andare a quello relativo all'evento da confrontare
+                                count = 0  # contatore (i link sono ordinati in un modo unico negli spazi comportamentali, questo mi serve per andare a quello relativo all'evento da confrontare)
                                 for link in links:  # ciclo i link esistenti
                                     # verifico che il link i-esimo sia uguale a quello della transizione
                                     if j.split(':')[0] == link.name:
