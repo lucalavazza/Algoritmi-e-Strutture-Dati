@@ -1,9 +1,11 @@
 # IMPORT VARI
+
 from graphviz import Digraph
 import collections
 
 
 # DEFINIZIONE DELLE CLASSI E DEI RELATIVI METODI
+
 class Automa:
     def __init__(self, name, states, edges, final_states):
         self.name = name
@@ -117,7 +119,7 @@ class ArcoComportamentale:
         spazio_comportamentale.attr("node", shape="circle")
         for arco in archi:
             finale = True
-            nodo_partenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink') #dello stato recupero prima gli stati e poi i link
+            nodo_partenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink') # dello stato comportamentale recupero prima gli stati e poi i link
             listaCollegamenti = getattr(arco.statoPartenza, 'listaLink')
 
             for collegamento in listaCollegamenti:
@@ -150,18 +152,18 @@ class ArcoComportamentale:
 
 # STRUMENTI DI IMPORT DEGLI ELEMENTI DA FILE TXT
 
-# Automi
+# Import degli Automi
 automa_file = open(".\Automa.txt", "r+")
 contenuto = automa_file.read()
 lista_automi = contenuto.split(" &\n")
 automi = []
+# Si riempie la lista di automi
 for automa in lista_automi:
     # Spezzo i dati del singolo automa
     contenuto_automa = automa.split("\n")
     nome_automa = contenuto_automa[0]
     stati = contenuto_automa[1].split(",")
     stati_finali = contenuto_automa[2].split(",")  # possono non esserci
-    # ogni lato è dato da: sorgente, destinazione, nome
     lati = contenuto_automa[3].split("|")
     # creazione oggetto Automa
     automi.append(Automa(nome_automa, stati, lati, stati_finali))
@@ -170,31 +172,29 @@ for automa in lista_automi:
 for automa in automi:
     automa.disegnaAutoma(automa.edges, automa.final_states)
 
-# Link
-# Formato: comp_iniziale, comp_finale, link, contenuto
+# Import dei Link
 link_file = open("Link.txt", "r+")
 contenuto = link_file.read()
 lista_link_inseriti = contenuto.split("\n")
-# print(lista_link_inseriti)
 links = []
+# Si riempie la lista di link
 for link in lista_link_inseriti:
     componente_iniziale = link.split(",")[0]
     componente_finale = link.split(",")[1]
     nome_link = link.split(",")[2]
     content = link.split(",")[3]
-    # Viene creato l'oggetto LINK
+    # creazione oggetto Link
     links.append(Link(componente_iniziale, componente_finale, nome_link, content))
 
 # Chiamo il metodo per disegnare la topologia. Gli passo l'oggetto Link (chiamato links) che ha tutti i collegamenti tra i vari componenti
 Link.disegnaTopologia(links);
 
-# Transizioni
-# Formato: Automa, nome, input, output, rilevanza, osservabilità
+# Import delle Transizioni
 transizioni_file = open("Transizioni.txt", "r+")
 contenuto = transizioni_file.read()
 transizioni = contenuto.split("\n")
-
 lista_transizioni = []
+# Si riempie la lista di transizioni
 for transizione in transizioni:
     componente = transizione.split(",")[0]
     lato = transizione.split(",")[1]
@@ -202,15 +202,19 @@ for transizione in transizioni:
     outputtrans = transizione.split(",")[3]
     obs = transizione.split(",")[5]
     rel = transizione.split(",")[4]
+    # creazione oggetto Transizione
     lista_transizioni.append(Transizione(componente, lato, inpuuttrans, outputtrans, obs, rel))
 
 # Stampo le transizioni
-for transizione in lista_transizioni:
-    print("\nTransizione", transizione.component, transizione.edge, transizione.input, transizione.output,
-          transizione.observability, transizione.relevance)
+# for transizione in lista_transizioni:
+#    print("\nTransizione", transizione.component, transizione.edge, transizione.input, transizione.output,
+#          transizione.observability, transizione.relevance)
+
+
+# COSTRUZIONE DELLO SPAZIO COMPORTAMENTALE
 
 # Ogni stato dello spazio comportamentale è definito da: stati dei componenti + contenuto link
-# Creo il primo stato dello spazio comportamentale, che sarà dato dai primi stati dei componenti e dai link vuoti (CONTROLLARE SE SPECIFICATO DIVERSO NELLA RICHIESTA)
+# Creo il primo stato dello spazio comportamentale, che sarà dato dai primi stati dei componenti e dai link vuoti
 lista_stati = []
 lista_link = []  # ricordarsi che qui ci sono i CONTENUTI dei link, inoltre è un dictionary
 
@@ -231,10 +235,11 @@ for x in links:
 finale = True  # Bisogna capire se all'inizio è sempre così o no
 
 # A questo punto posso creare l'oggetto stato_comportamentale come la lista degli stati ed i contenuti dei link che lo definiscono
-stato_comportamentale.append(StatoComportamentale(lista_stati, lista_link, finale))
+stato_comportamentale.append(StatoComportamentale(lista_stati, lista_link, finale)) # a questo punto nella lista ho lo stato comp. iniziale
 
 iterazione = 0
 statoCambiato = True
+# costruzione dello stato comportamentale
 while statoCambiato:
     i = StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, lista_stati, lista_link)
     print("Stato attuale: ", lista_stati, lista_link)
@@ -388,3 +393,5 @@ while statoCambiato:
 
 
 ArcoComportamentale.disegnaSpazioComportamentale(ArcoComportamentale, arco_comportamentale)
+
+

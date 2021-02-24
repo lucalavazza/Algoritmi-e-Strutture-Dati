@@ -1,0 +1,6 @@
+digraph topologia {
+	rankdir=LR size="8,5"
+	node [shape=rectangle]
+	C3 -> C2 [label=L2]
+	C2 -> C3 [label=L3]
+}
