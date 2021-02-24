@@ -111,8 +111,8 @@ class ArcoComportamentale:
                 return True
         return False
 
-    def disegnaSpazioComportamentale(self, archi):
-        spazio_comportamentale = Digraph("Spazio Comportamentale", filename="SpazioComportamentale.gv")
+    def disegnaSpazioComportamentale(self, archi, titolo):
+        spazio_comportamentale = Digraph(titolo, filename=""+titolo+".gv")
         spazio_comportamentale.attr(rankdir="LR", size="8.5")
         spazio_comportamentale.attr("node", shape="circle")
         for arco in archi:
@@ -387,4 +387,34 @@ while statoCambiato:
             print("È stato aggiunto un nuovo stato allo spazio comportamentale, ricomincio da capo con le transizioni")
 
 
-ArcoComportamentale.disegnaSpazioComportamentale(ArcoComportamentale, arco_comportamentale)
+ArcoComportamentale.disegnaSpazioComportamentale(ArcoComportamentale, arco_comportamentale, 'SpazioComportamentale')
+
+lista_link_vuota = ['\u03B5', '\u03B5']
+
+# Poto lo spazio comportamentale
+nodoRimosso = True
+while nodoRimosso:
+    if nodoRimosso:
+        nodoRimosso = False
+    for nodo in stato_comportamentale:
+        # Se il nodo ha i link vuoti è terminale e procedo oltre
+        if nodo.listaLink == lista_link_vuota:
+            continue
+        rimuovi = True
+        for arco in arco_comportamentale:
+            print(getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink'), " == ", (nodo.listaStati + nodo.listaLink))
+            if (getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink')) == (nodo.listaStati + nodo.listaLink):
+                print("Non rimuovere")
+                rimuovi = False
+                break
+        if rimuovi:
+            for arco in arco_comportamentale:
+                if (getattr(arco.statoDestinazione, 'listaStati') + getattr(arco.statoDestinazione, 'listaLink')) == (nodo.listaStati + nodo.listaLink) or\
+                        (getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink')) == (nodo.listaStati + nodo.listaLink):
+                    arco_comportamentale.remove(arco)
+            print("Poto un nodo")
+            stato_comportamentale.remove(nodo)
+            nodoRimosso = True
+
+
+ArcoComportamentale.disegnaSpazioComportamentale(ArcoComportamentale, arco_comportamentale, 'SpazioComportamentalePotato')
