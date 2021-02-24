@@ -67,13 +67,25 @@ class StatoComportamentale:
         self.listaStati = listaStati
         self.listaLink = listaLink
 
+    # Questo metodo restituisce la posizione dello stato dello spazio comportamentale nella lista
+    def getPosStatoComportamentale(self, nuovaListaStati, nuovaListaLink):
+        count = 0
+        for v in stato_comportamentale:
+            if v.listaStati == nuovaListaStati and v.listaLink == nuovaListaLink:
+                return count
+            count += 1
+        return -1
+
+    # Questo metodo restituisce i dati di un nodo dello spazio comportamentale dato l'indice
+    def getStatiLinkComportamentali(self, i):
+        lista_stati = stato_comportamentale[i].listaStati
+        lista_link = stato_comportamentale[i].listaLink
+        return lista_stati, lista_link
+
     # mi dice se uno stato comportamentale è una copia di un altro
     def isDuplicate(self, nuovaListaStati, nuovaListaLink):
-        # print("Nodo in verifica: ", nuovaListaStati, nuovaListaLink)
         for v in stato_comportamentale:
-            # print("Verificando: ", v.listaStati, v.listaLink)
             if v.listaStati == nuovaListaStati and v.listaLink == nuovaListaLink:
-                # print("Nodo già esistente: ", v.listaStati, v.listaLink)
                 return True
         return False
 
@@ -227,10 +239,11 @@ finale = True  # Bisogna capire se all'inizio è sempre così o no
 # A questo punto posso creare l'oggetto stato_comportamentale come la lista degli stati ed i contenuti dei link che lo definiscono
 stato_comportamentale.append(StatoComportamentale(lista_stati, lista_link, finale))
 
-i = 0  # numero di stati comportamentali
 iterazione = 0
 statoCambiato = True
 while statoCambiato:
+    i = StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, lista_stati, lista_link)
+    print("Stato attuale: ", lista_stati, lista_link)
     statoCambiato = False
     print("Iterazione: ", iterazione)
     iterazione += 1
@@ -315,18 +328,17 @@ while statoCambiato:
                             if doppione:  # il nodo a cui posso muovermi esiste già
                                 arcoDoppione = ArcoComportamentale.isDuplicate(arco_comportamentale, lista_stati + lista_link, nuova_lista_stati + nuova_lista_link, transizione.edge)
                                 if arcoDoppione:
-                                    # l'arco esiste già
+                                    # l'arco esiste già, vado allo stato già esistente
                                     lista_stati = nuova_lista_stati.copy()
                                     lista_link = nuova_lista_link.copy()
                                     break
                                 else:
                                     # procedo a costruire l'arco che collegherà il nodo attuale a quello "doppione"
-                                    finale = StatoComportamentale.verificaSeStatoFinale(stato_comportamentale, nuova_lista_link)
                                     print("Costruzione di solo arco in corso verso: ", nuova_lista_stati, nuova_lista_link)
                                     # devo trovare in che posto è lo stato doppione
                                     posizione_doppione = StatoComportamentale.cercaDoppione(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
                                     arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[posizione_doppione], transizione.edge))
-
+                                    i = posizione_doppione
                                     lista_stati = nuova_lista_stati.copy()
                                     lista_link = nuova_lista_link.copy()
                                     break
@@ -335,13 +347,13 @@ while statoCambiato:
                                 # verifico se lo stato è o meno finale
                                 finale = StatoComportamentale.verificaSeStatoFinale(stato_comportamentale, nuova_lista_link)
                                 print("Nessun doppione trovato")
-                                i += 1
                                 print("Sto costruendo un nuovo stato: ", nuova_lista_stati, nuova_lista_link, finale)
                                 stato_comportamentale.append(StatoComportamentale(nuova_lista_stati, nuova_lista_link, finale))
                                 # Costruisco l'arco tra i due stati dello spazio comportamentale
-                                arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i - 1], stato_comportamentale[i], transizione.edge))
+                                arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[len(stato_comportamentale) - 1], transizione.edge))
                                 lista_stati = nuova_lista_stati.copy()
                                 lista_link = nuova_lista_link.copy()
+                                i = StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, lista_stati, lista_link)
                                 break
                     if not soddisfa:
                         break
@@ -351,7 +363,24 @@ while statoCambiato:
             if not soddisfa:
                 break
             pos_automa += 1
-        print("Stati dello spazio comportamentale costruiti: ", i + 1)  # numero stati comportamentali creati fino a quel momento (parte da zero)
+
+
+        transizioneAttuale = transizione.component + "," + transizione.edge + "," + transizione.input + "," + transizione.output + "," + transizione.relevance + "," + transizione.observability
+        # prendo i dati della radice
+        statiRadice, linkRadice = StatoComportamentale.getStatiLinkComportamentali(stato_comportamentale, 0)
+
+        # Nessun cambio di stato ed ho esaurito le transizioni disponibili, cioè sono bloccato in un terminale
+        if not statoCambiato and transizioneAttuale == transizioni[len(transizioni) - 1]:
+            print("Nessun cambiamento apportato, torno indietro")
+            i -= 1
+            lista_temp_stati, lista_temp_link = StatoComportamentale.getStatiLinkComportamentali(stato_comportamentale, i)
+            print("Torno allo stato: ", lista_temp_stati, lista_temp_link)
+            lista_stati = lista_temp_stati.copy()
+            lista_link = lista_temp_link.copy()
+            if statiRadice == lista_stati and linkRadice == lista_link:
+                print("Sono tornato alla radice")
+                statoCambiato = False
+
         if statoCambiato:
             break
 
