@@ -1,7 +1,0 @@
-digraph "Macchina Stati Finiti" {
-	rankdir=LR size="8,5"
-	node [shape=doublecircle]
-	LR_0
-	node [shape=circle]
-	LR_1 -> LR_0 [label="S(A)"]
-}

@@ -1,8 +1,0 @@
-digraph C2 {
-	rankdir=LR size=8.5
-	node [shape=circle]
-	node [shape=circle]
-	20 -> 21 [label=t2a]
-	node [shape=circle]
-	21 -> 20 [label=t2b]
-}
