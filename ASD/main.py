@@ -96,6 +96,12 @@ class StatoComportamentale:
                 return False
         return True
 
+class StatoComportamentaleConNome:
+    def __init__(self, listaStati, listaLink, nome, finale):
+        self.listaStati = listaStati
+        self.listaLink = listaLink
+        self.nome = nome
+
 
 class ArcoComportamentale:
     def __init__(self, statoPartenza, statoDestinazione, etichetta):
@@ -147,6 +153,56 @@ class ArcoComportamentale:
             spazio_comportamentale.edge(nodo_partenza, nodo_destinazione, label=nomeEtichetta)
         spazio_comportamentale.view()
 
+    # molto simile alla versione normale, ma al posto di stampare gli stati completi, ne stampa solo l'etichetta
+    def disegnaSpazioComportamentaleRidenominato(self, archi, titolo):
+        spazio_comportamentale = Digraph(titolo, filename=""+titolo+".gv")
+        spazio_comportamentale.attr(rankdir="LR", size="8.5")
+        spazio_comportamentale.attr("node", shape="circle")
+        for arco in archi:
+            finale = True
+            nodo_partenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink') #dello stato recupero prima gli stati e poi i link
+            mylabelPartenzaString = str(getattr(arco.statoPartenza, 'nome'))
+            listaCollegamenti = getattr(arco.statoPartenza, 'listaLink')
+
+            for collegamento in listaCollegamenti:
+                if collegamento != '\u03B5':
+                    finale = False
+                    break
+            nodo_partenza = ' '.join(nodo_partenza)  # converto la lista in stringa
+            if finale:
+                spazio_comportamentale.attr('node', shape='doublecircle')
+                spazio_comportamentale.node(mylabelPartenzaString)
+
+            finale = True
+            nodo_destinazione = getattr(arco.statoDestinazione, 'listaStati') + getattr(arco.statoDestinazione, 'listaLink')
+            mylabelDestinazioneString = str(getattr(arco.statoDestinazione, 'nome'))
+            listaCollegamenti = getattr(arco.statoDestinazione, 'listaLink')
+
+            for collegamento in listaCollegamenti:
+                if collegamento != '\u03B5':
+                    finale = False
+                    break
+            nodo_destinazione = ' '.join(nodo_destinazione)  # converto la lista in stringa
+            if finale:
+                spazio_comportamentale.attr('node', shape='doublecircle')
+                spazio_comportamentale.node(mylabelDestinazioneString)
+
+            spazio_comportamentale.attr('node', shape='circle')
+            nomeEtichetta = arco.etichetta
+
+            #ovviamente non funziona
+            for t in lista_transizioni:
+                if nomeEtichetta == t.edge and t.input in getattr(arco.statoPartenza, 'listaLink'):
+                    if t.observability != '\u03B5':
+                        etichettatura = t.observability
+                    elif t.relevance != '\u03B5':
+                        etichettatura = t.relevance
+                    else:
+                        etichettatura = 'gino'
+                else:
+                    etichettatura = ' pippo'
+            spazio_comportamentale.edge(mylabelPartenzaString, mylabelDestinazioneString, label=(nomeEtichetta + etichettatura))
+        spazio_comportamentale.view()
 
 # STRUMENTI DI IMPORT DEGLI ELEMENTI DA FILE TXT
 
@@ -418,3 +474,23 @@ while nodoRimosso:
 
 
 ArcoComportamentale.disegnaSpazioComportamentale(ArcoComportamentale, arco_comportamentale, 'SpazioComportamentalePotato')
+
+#faccio una copia di stato_comportamentale, a cui aggiungo un nome univoco per ciascuno stato
+stato_comportamentale_ridenominato =[]
+i=0
+for s in stato_comportamentale:
+    stato_comportamentale_ridenominato.append(StatoComportamentaleConNome(s.listaStati, s.listaLink, i, finale))
+    i +=1
+
+#faccio una copia di arco_comportamentale, in cui metto gli elementi di stato_comportamentale_ridenominato
+arco_comportamentale_ridenominato = arco_comportamentale.copy()
+for arco in arco_comportamentale_ridenominato:
+    for s in stato_comportamentale_ridenominato:
+        if getattr(arco.statoPartenza, 'listaStati') == s.listaStati and getattr(arco.statoPartenza, 'listaLink') == s.listaLink:
+            arco.statoPartenza = s
+        elif getattr(arco.statoDestinazione, 'listaStati') == s.listaStati and getattr(arco.statoDestinazione, 'listaLink') == s.listaLink:
+            arco.statoDestinazione = s
+        else:
+            continue
+
+ArcoComportamentale.disegnaSpazioComportamentaleRidenominato(ArcoComportamentale, arco_comportamentale_ridenominato, 'SpazioComportamentalePotatoRidenominato')
