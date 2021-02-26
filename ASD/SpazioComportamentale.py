@@ -114,14 +114,15 @@ class ArcoComportamentale:
 
             finale = True
             nodo_destinazione = getattr(arco.statoDestinazione, 'listaStati') + getattr(arco.statoDestinazione, 'listaLink')
-            print(nodo_destinazione)
             mylabelDestinazioneString = str(getattr(arco.statoDestinazione, 'nome'))
             listaCollegamenti = getattr(arco.statoDestinazione, 'listaLink')
             etichetta = arco.etichetta
-            if arco.observability != '\u03B5' and arco.relevance == '\u03B5':
+            if arco.observability != 'Îµ' and arco.relevance == 'Îµ':
                 etichetta = etichetta + " " + arco.observability
-            elif arco.observability == '\u03B5' and arco.relevance != '\u03B5':
+            elif arco.observability == 'Îµ' and arco.relevance != 'Îµ':
                 etichetta = etichetta + " " + arco.relevance
+            elif arco.observability == 'Îµ' and arco.relevance == 'Îµ':
+                etichetta = etichetta + " " + '\u03B5'
             else:
                 etichetta = etichetta + " " + arco.observability + " " + arco.relevance
 
@@ -129,7 +130,6 @@ class ArcoComportamentale:
                 if collegamento != '\u03B5':
                     finale = False
                     break
-            print(etichetta)
             if finale:
                 spazio_comportamentale.attr('node', shape='doublecircle')
                 spazio_comportamentale.node(mylabelDestinazioneString)
