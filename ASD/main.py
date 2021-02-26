@@ -1,210 +1,8 @@
-# IMPORT VARI
-from graphviz import Digraph
-import collections
+import SpazioComportamentale
+import Automa
+import Link
+import Transizione
 
-
-# DEFINIZIONE DELLE CLASSI E DEI RELATIVI METODI
-class Automa:
-    def __init__(self, name, states, edges, final_states):
-        self.name = name
-        self.states = states
-        self.edges = edges
-        self.final_states = final_states
-
-    def disegnaAutoma(self, lati, final_states):
-        fa = Digraph(self.name, filename="" + self.name + ".gv")
-        fa.attr(rankdir="LR", size="8.5")
-        fa.attr('node', shape='circle')
-        i = 0
-        for x in self.edges:
-            nodo_partenza = lati[i].split(',')[0]
-            nodo_destinazione = lati[i].split(',')[1]
-
-            if nodo_partenza in final_states:
-                fa.attr('node', shape='doublecircle')
-                fa.node(nodo_partenza)
-            if nodo_destinazione in final_states:
-                fa.attr('node', shape='doublecircle')
-                fa.node(nodo_destinazione)
-
-            etichetta = lati[i].split(',')[2]
-            fa.attr('node', shape='circle')
-            fa.edge(nodo_partenza, nodo_destinazione, label=etichetta)
-            i = i + 1
-        fa.view()
-
-
-class Link:
-    def __init__(self, initial, final, name, content):
-        self.initial = initial
-        self.final = final
-        self.name = name
-        self.content = content
-
-    def disegnaTopologia(self):
-        nome_topologia = "topologia"
-        topologia = Digraph(nome_topologia, filename="" + nome_topologia + ".gv")
-        topologia.attr(rankdir="LR", size="8,5")
-        topologia.attr("node", shape="rectangle")
-
-        for link in links:
-            topologia.edge(link.initial, link.final, label=link.name)
-        topologia.view()
-
-
-class Transizione:
-    def __init__(self, component, edge, input, output, observability, relevance):
-        self.component = component
-        self.edge = edge
-        self.input = input
-        self.output = output
-        self.observability = observability
-        self.relevance = relevance
-
-
-class StatoComportamentale:
-    def __init__(self, listaStati, listaLink, finale):
-        self.listaStati = listaStati
-        self.listaLink = listaLink
-
-    # Questo metodo restituisce la posizione dello stato dello spazio comportamentale nella lista
-    def getPosStatoComportamentale(self, nuovaListaStati, nuovaListaLink):
-        count = 0
-        for v in stato_comportamentale:
-            if v.listaStati == nuovaListaStati and v.listaLink == nuovaListaLink:
-                return count
-            count += 1
-        return -1
-
-    # Questo metodo restituisce i dati di un nodo dello spazio comportamentale dato l'indice
-    def getStatiLinkComportamentali(self, i):
-        lista_stati = stato_comportamentale[i].listaStati
-        lista_link = stato_comportamentale[i].listaLink
-        return lista_stati, lista_link
-
-    # mi dice se uno stato comportamentale è una copia di un altro
-    def isDuplicate(self, nuovaListaStati, nuovaListaLink):
-        for v in stato_comportamentale:
-            if v.listaStati == nuovaListaStati and v.listaLink == nuovaListaLink:
-                return True
-        return False
-
-    # autoesplicativo
-    def verificaSeStatoFinale(self, nuovaListaLink):
-        for link in nuovaListaLink:
-            if link != '\u03B5':
-                return False
-        return True
-
-class StatoComportamentaleConNome:
-    def __init__(self, listaStati, listaLink, nome, finale):
-        self.listaStati = listaStati
-        self.listaLink = listaLink
-        self.nome = nome
-
-
-class ArcoComportamentale:
-    def __init__(self, statoPartenza, statoDestinazione, etichetta):
-        self.statoPartenza = statoPartenza
-        self.statoDestinazione = statoDestinazione
-        self.etichetta = etichetta
-
-    def isDuplicate(self, statoPartenza, statoDestinazione, etichetta):
-        for v in arco_comportamentale:
-            partenza = getattr(v.statoPartenza, 'listaStati') + getattr(v.statoPartenza, 'listaLink')
-            arrivo = getattr(v.statoDestinazione, 'listaStati') + getattr(v.statoDestinazione, 'listaLink')
-            if partenza == statoPartenza and arrivo == statoDestinazione and v.etichetta == etichetta:
-                return True
-        return False
-
-    def disegnaSpazioComportamentale(self, archi, titolo):
-        spazio_comportamentale = Digraph(titolo, filename=""+titolo+".gv")
-        spazio_comportamentale.attr(rankdir="LR", size="8.5")
-        spazio_comportamentale.attr("node", shape="circle")
-        for arco in archi:
-            finale = True
-            nodo_partenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink') #dello stato recupero prima gli stati e poi i link
-            listaCollegamenti = getattr(arco.statoPartenza, 'listaLink')
-
-            for collegamento in listaCollegamenti:
-                if collegamento != '\u03B5':
-                    finale = False
-                    break
-            nodo_partenza = ' '.join(nodo_partenza)  # converto la lista in stringa
-            if finale:
-                spazio_comportamentale.attr('node', shape='doublecircle')
-                spazio_comportamentale.node(nodo_partenza)
-
-            finale = True
-            nodo_destinazione = getattr(arco.statoDestinazione, 'listaStati') + getattr(arco.statoDestinazione, 'listaLink')
-            listaCollegamenti = getattr(arco.statoDestinazione, 'listaLink')
-
-            for collegamento in listaCollegamenti:
-                if collegamento != '\u03B5':
-                    finale = False
-                    break
-            nodo_destinazione = ' '.join(nodo_destinazione)  # converto la lista in stringa
-            if finale:
-                spazio_comportamentale.attr('node', shape='doublecircle')
-                spazio_comportamentale.node(nodo_destinazione)
-
-            spazio_comportamentale.attr('node', shape='circle')
-            nomeEtichetta = arco.etichetta
-            spazio_comportamentale.edge(nodo_partenza, nodo_destinazione, label=nomeEtichetta)
-        spazio_comportamentale.view()
-
-    # molto simile alla versione normale, ma al posto di stampare gli stati completi, ne stampa solo l'etichetta
-    def disegnaSpazioComportamentaleRidenominato(self, archi, titolo):
-        spazio_comportamentale = Digraph(titolo, filename=""+titolo+".gv")
-        spazio_comportamentale.attr(rankdir="LR", size="8.5")
-        spazio_comportamentale.attr("node", shape="circle")
-        for arco in archi:
-            finale = True
-            nodo_partenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink') #dello stato recupero prima gli stati e poi i link
-            mylabelPartenzaString = str(getattr(arco.statoPartenza, 'nome'))
-            listaCollegamenti = getattr(arco.statoPartenza, 'listaLink')
-
-            for collegamento in listaCollegamenti:
-                if collegamento != '\u03B5':
-                    finale = False
-                    break
-            nodo_partenza = ' '.join(nodo_partenza)  # converto la lista in stringa
-            if finale:
-                spazio_comportamentale.attr('node', shape='doublecircle')
-                spazio_comportamentale.node(mylabelPartenzaString)
-
-            finale = True
-            nodo_destinazione = getattr(arco.statoDestinazione, 'listaStati') + getattr(arco.statoDestinazione, 'listaLink')
-            mylabelDestinazioneString = str(getattr(arco.statoDestinazione, 'nome'))
-            listaCollegamenti = getattr(arco.statoDestinazione, 'listaLink')
-
-            for collegamento in listaCollegamenti:
-                if collegamento != '\u03B5':
-                    finale = False
-                    break
-            nodo_destinazione = ' '.join(nodo_destinazione)  # converto la lista in stringa
-            if finale:
-                spazio_comportamentale.attr('node', shape='doublecircle')
-                spazio_comportamentale.node(mylabelDestinazioneString)
-
-            spazio_comportamentale.attr('node', shape='circle')
-            nomeEtichetta = arco.etichetta
-
-            #ovviamente non funziona
-            for t in lista_transizioni:
-                if nomeEtichetta == t.edge and t.input in getattr(arco.statoPartenza, 'listaLink'):
-                    if t.observability != '\u03B5':
-                        etichettatura = t.observability
-                    elif t.relevance != '\u03B5':
-                        etichettatura = t.relevance
-                    else:
-                        etichettatura = 'gino'
-                else:
-                    etichettatura = ' pippo'
-            spazio_comportamentale.edge(mylabelPartenzaString, mylabelDestinazioneString, label=(nomeEtichetta + etichettatura))
-        spazio_comportamentale.view()
-
-# STRUMENTI DI IMPORT DEGLI ELEMENTI DA FILE TXT
 
 # Automi
 automa_file = open(".\Automa.txt", "r+")
@@ -220,7 +18,7 @@ for automa in lista_automi:
     # ogni lato è dato da: sorgente, destinazione, nome
     lati = contenuto_automa[3].split("|")
     # creazione oggetto Automa
-    automi.append(Automa(nome_automa, stati, lati, stati_finali))
+    automi.append(Automa.Automa(nome_automa, stati, lati, stati_finali))
 
 # Richiamo della funzione per disegnare gli automi uno per volta
 for automa in automi:
@@ -239,10 +37,10 @@ for link in lista_link_inseriti:
     nome_link = link.split(",")[2]
     content = link.split(",")[3]
     # Viene creato l'oggetto LINK
-    links.append(Link(componente_iniziale, componente_finale, nome_link, content))
+    links.append(Link.Link(componente_iniziale, componente_finale, nome_link, content))
 
 # Chiamo il metodo per disegnare la topologia. Gli passo l'oggetto Link (chiamato links) che ha tutti i collegamenti tra i vari componenti
-Link.disegnaTopologia(links);
+Link.Link.disegnaTopologia(links);
 
 # Transizioni
 # Formato: Automa, nome, input, output, rilevanza, osservabilità
@@ -258,7 +56,7 @@ for transizione in transizioni:
     outputtrans = transizione.split(",")[3]
     obs = transizione.split(",")[5]
     rel = transizione.split(",")[4]
-    lista_transizioni.append(Transizione(componente, lato, inpuuttrans, outputtrans, obs, rel))
+    lista_transizioni.append(Transizione.Transizione(componente, lato, inpuuttrans, outputtrans, obs, rel))
 
 # Stampo le transizioni
 for transizione in lista_transizioni:
@@ -287,12 +85,12 @@ for x in links:
 finale = True  # Bisogna capire se all'inizio è sempre così o no
 
 # A questo punto posso creare l'oggetto stato_comportamentale come la lista degli stati ed i contenuti dei link che lo definiscono
-stato_comportamentale.append(StatoComportamentale(lista_stati, lista_link, finale))
+stato_comportamentale.append(SpazioComportamentale.StatoComportamentale(lista_stati, lista_link, finale))
 
 iterazione = 0
 statoCambiato = True
 while statoCambiato:
-    i = StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, lista_stati, lista_link)
+    i = SpazioComportamentale.StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, lista_stati, lista_link)
     print("Stato attuale: ", lista_stati, lista_link)
     statoCambiato = False
     print("Iterazione: ", iterazione)
@@ -374,12 +172,12 @@ while statoCambiato:
                                     count += 1
 
                             # Verifico che il nuovo stato dello spazio comportamentale non esista già
-                            doppione = StatoComportamentale.isDuplicate(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
+                            doppione = SpazioComportamentale.StatoComportamentale.isDuplicate(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
                             print("Il nodo è un doppione? ", doppione)
 
                             if doppione:  # il nodo a cui posso muovermi esiste già
                                 print(lista_stati + lista_link, " == ", nuova_lista_stati + nuova_lista_link, "; ", transizione.edge)
-                                arcoDoppione = ArcoComportamentale.isDuplicate(arco_comportamentale, lista_stati + lista_link, nuova_lista_stati + nuova_lista_link, transizione.edge)
+                                arcoDoppione = SpazioComportamentale.ArcoComportamentale.isDuplicate(arco_comportamentale, lista_stati + lista_link, nuova_lista_stati + nuova_lista_link, transizione.edge)
                                 print("L'arco è un doppione? ", arcoDoppione)
                                 if arcoDoppione:
                                     break
@@ -387,9 +185,9 @@ while statoCambiato:
                                     # procedo a costruire l'arco che collegherà il nodo attuale a quello "doppione"
                                     print("Costruzione di solo arco in corso verso: ", nuova_lista_stati, nuova_lista_link)
                                     # devo trovare in che posto è lo stato doppione
-                                    posizione_doppione = StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
+                                    posizione_doppione = SpazioComportamentale.StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
                                     print("Posizione doppione: ", posizione_doppione)
-                                    arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[posizione_doppione], transizione.edge))
+                                    arco_comportamentale.append(SpazioComportamentale.ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[posizione_doppione], transizione.edge))
                                     i = posizione_doppione
                                     # lista_stati = nuova_lista_stati.copy()
                                     # lista_link = nuova_lista_link.copy()
@@ -398,15 +196,15 @@ while statoCambiato:
                             else:  # faccio il nuovo stato
                                 statoCambiato = True
                                 # verifico se lo stato è o meno finale
-                                finale = StatoComportamentale.verificaSeStatoFinale(stato_comportamentale, nuova_lista_link)
+                                finale = SpazioComportamentale.StatoComportamentale.verificaSeStatoFinale(stato_comportamentale, nuova_lista_link)
                                 print("Nessun doppione trovato")
                                 print("Sto costruendo un nuovo stato: ", nuova_lista_stati, nuova_lista_link, finale)
-                                stato_comportamentale.append(StatoComportamentale(nuova_lista_stati, nuova_lista_link, finale))
+                                stato_comportamentale.append(SpazioComportamentale.StatoComportamentale(nuova_lista_stati, nuova_lista_link, finale))
                                 # Costruisco l'arco tra i due stati dello spazio comportamentale
-                                arco_comportamentale.append(ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[len(stato_comportamentale) - 1], transizione.edge))
+                                arco_comportamentale.append(SpazioComportamentale.ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[len(stato_comportamentale) - 1], transizione.edge))
                                 lista_stati = nuova_lista_stati.copy()
                                 lista_link = nuova_lista_link.copy()
-                                i = StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, lista_stati, lista_link)
+                                i = SpazioComportamentale.StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, lista_stati, lista_link)
                                 break
                     if not soddisfa:
                         break
@@ -420,14 +218,14 @@ while statoCambiato:
 
         transizioneAttuale = transizione.component + "," + transizione.edge + "," + transizione.input + "," + transizione.output + "," + transizione.relevance + "," + transizione.observability
         # prendo i dati della radice
-        statiRadice, linkRadice = StatoComportamentale.getStatiLinkComportamentali(stato_comportamentale, 0)
+        statiRadice, linkRadice = SpazioComportamentale.StatoComportamentale.getStatiLinkComportamentali(stato_comportamentale, 0)
 
 
         # Nessun cambio di stato ed ho esaurito le transizioni disponibili, cioè sono bloccato in un terminale
         if not statoCambiato and transizioneAttuale == transizioni[len(transizioni) - 1]:
             print("Nessun cambiamento apportato, torno indietro")
             i -= 1
-            lista_temp_stati, lista_temp_link = StatoComportamentale.getStatiLinkComportamentali(stato_comportamentale, i)
+            lista_temp_stati, lista_temp_link = SpazioComportamentale.StatoComportamentale.getStatiLinkComportamentali(stato_comportamentale, i)
             print("Torno allo stato: ", lista_temp_stati, lista_temp_link)
             lista_stati = lista_temp_stati.copy()
             lista_link = lista_temp_link.copy()
@@ -443,7 +241,7 @@ while statoCambiato:
             print("È stato aggiunto un nuovo stato allo spazio comportamentale, ricomincio da capo con le transizioni")
 
 
-ArcoComportamentale.disegnaSpazioComportamentale(ArcoComportamentale, arco_comportamentale, 'SpazioComportamentale')
+SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale, 'SpazioComportamentale')
 
 lista_link_vuota = ['\u03B5', '\u03B5']
 
@@ -458,7 +256,7 @@ while nodoRimosso:
             continue
         rimuovi = True
         for arco in arco_comportamentale:
-            print(getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink'), " == ", (nodo.listaStati + nodo.listaLink))
+            # print(getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink'), " == ", (nodo.listaStati + nodo.listaLink))
             if (getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink')) == (nodo.listaStati + nodo.listaLink):
                 print("Non rimuovere")
                 rimuovi = False
@@ -473,24 +271,24 @@ while nodoRimosso:
             nodoRimosso = True
 
 
-ArcoComportamentale.disegnaSpazioComportamentale(ArcoComportamentale, arco_comportamentale, 'SpazioComportamentalePotato')
+SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale, 'SpazioComportamentalePotato')
 
 #faccio una copia di stato_comportamentale, a cui aggiungo un nome univoco per ciascuno stato
 stato_comportamentale_ridenominato =[]
 i=0
 for s in stato_comportamentale:
-    stato_comportamentale_ridenominato.append(StatoComportamentaleConNome(s.listaStati, s.listaLink, i, finale))
+    stato_comportamentale_ridenominato.append(SpazioComportamentale.StatoComportamentaleConNome(s.listaStati, s.listaLink, i, finale))
     i +=1
 
 #faccio una copia di arco_comportamentale, in cui metto gli elementi di stato_comportamentale_ridenominato
 arco_comportamentale_ridenominato = arco_comportamentale.copy()
 for arco in arco_comportamentale_ridenominato:
-    for s in stato_comportamentale_ridenominato:
-        if getattr(arco.statoPartenza, 'listaStati') == s.listaStati and getattr(arco.statoPartenza, 'listaLink') == s.listaLink:
-            arco.statoPartenza = s
-        elif getattr(arco.statoDestinazione, 'listaStati') == s.listaStati and getattr(arco.statoDestinazione, 'listaLink') == s.listaLink:
-            arco.statoDestinazione = s
+    for stato in stato_comportamentale_ridenominato:
+        if getattr(arco.statoPartenza, 'listaStati') == stato.listaStati and getattr(arco.statoPartenza, 'listaLink') == stato.listaLink:
+            arco.statoPartenza = stato
+        elif getattr(arco.statoDestinazione, 'listaStati') == stato.listaStati and getattr(arco.statoDestinazione, 'listaLink') == stato.listaLink:
+            arco.statoDestinazione = stato
         else:
             continue
 
-ArcoComportamentale.disegnaSpazioComportamentaleRidenominato(ArcoComportamentale, arco_comportamentale_ridenominato, 'SpazioComportamentalePotatoRidenominato')
+SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentaleRidenominato(arco_comportamentale_ridenominato, lista_transizioni, 'SpazioComportamentalePotatoRidenominato')
