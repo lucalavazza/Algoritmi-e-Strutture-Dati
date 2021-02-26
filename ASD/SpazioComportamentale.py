@@ -42,10 +42,12 @@ class StatoComportamentaleConNome:
 
 
 class ArcoComportamentale:
-    def __init__(self, statoPartenza, statoDestinazione, etichetta):
+    def __init__(self, statoPartenza, statoDestinazione, etichetta, observability, relevance):
         self.statoPartenza = statoPartenza
         self.statoDestinazione = statoDestinazione
         self.etichetta = etichetta
+        self.observability = observability
+        self.relevance = relevance
 
     def isDuplicate(self, statoPartenza, statoDestinazione, etichetta):
         for v in self:
@@ -92,7 +94,7 @@ class ArcoComportamentale:
         spazio_comportamentale.view()
 
     # molto simile alla versione normale, ma al posto di stampare gli stati completi, ne stampa solo l'etichetta
-    def disegnaSpazioComportamentaleRidenominato(self, listaTransizioni, titolo):
+    def disegnaSpazioComportamentaleRidenominato(self, titolo):
         spazio_comportamentale = Digraph(titolo, filename="" + titolo + ".gv")
         spazio_comportamentale.attr(rankdir="LR", size="8.5")
         spazio_comportamentale.attr("node", shape="circle")
@@ -106,38 +108,33 @@ class ArcoComportamentale:
                 if collegamento != '\u03B5':
                     finale = False
                     break
-            nodo_partenza = ' '.join(nodo_partenza)  # converto la lista in stringa
             if finale:
                 spazio_comportamentale.attr('node', shape='doublecircle')
                 spazio_comportamentale.node(mylabelPartenzaString)
 
             finale = True
             nodo_destinazione = getattr(arco.statoDestinazione, 'listaStati') + getattr(arco.statoDestinazione, 'listaLink')
+            print(nodo_destinazione)
             mylabelDestinazioneString = str(getattr(arco.statoDestinazione, 'nome'))
             listaCollegamenti = getattr(arco.statoDestinazione, 'listaLink')
+            etichetta = arco.etichetta
+            if arco.observability != '\u03B5' and arco.relevance == '\u03B5':
+                etichetta = etichetta + " " + arco.observability
+            elif arco.observability == '\u03B5' and arco.relevance != '\u03B5':
+                etichetta = etichetta + " " + arco.relevance
+            else:
+                etichetta = etichetta + " " + arco.observability + " " + arco.relevance
 
             for collegamento in listaCollegamenti:
                 if collegamento != '\u03B5':
                     finale = False
                     break
-            nodo_destinazione = ' '.join(nodo_destinazione)  # converto la lista in stringa
+            print(etichetta)
             if finale:
                 spazio_comportamentale.attr('node', shape='doublecircle')
                 spazio_comportamentale.node(mylabelDestinazioneString)
 
             spazio_comportamentale.attr('node', shape='circle')
-            nomeEtichetta = arco.etichetta
 
-            # ovviamente non funziona
-            for t in listaTransizioni:
-                if nomeEtichetta == t.edge and t.input in getattr(arco.statoPartenza, 'listaLink'):
-                    if t.observability != '\u03B5':
-                        etichettatura = t.observability
-                    elif t.relevance != '\u03B5':
-                        etichettatura = t.relevance
-                    else:
-                        etichettatura = 'gino'
-                else:
-                    etichettatura = ' pippo'
-            spazio_comportamentale.edge(mylabelPartenzaString, mylabelDestinazioneString, label=(nomeEtichetta + etichettatura))
+            spazio_comportamentale.edge(mylabelPartenzaString, mylabelDestinazioneString, label=etichetta)
         spazio_comportamentale.view()

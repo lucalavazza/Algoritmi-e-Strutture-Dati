@@ -187,7 +187,7 @@ while statoCambiato:
                                     # devo trovare in che posto è lo stato doppione
                                     posizione_doppione = SpazioComportamentale.StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, nuova_lista_stati, nuova_lista_link)
                                     print("Posizione doppione: ", posizione_doppione)
-                                    arco_comportamentale.append(SpazioComportamentale.ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[posizione_doppione], transizione.edge))
+                                    arco_comportamentale.append(SpazioComportamentale.ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[posizione_doppione], transizione.edge, transizione.observability, transizione.relevance))
                                     i = posizione_doppione
                                     # lista_stati = nuova_lista_stati.copy()
                                     # lista_link = nuova_lista_link.copy()
@@ -201,7 +201,7 @@ while statoCambiato:
                                 print("Sto costruendo un nuovo stato: ", nuova_lista_stati, nuova_lista_link, finale)
                                 stato_comportamentale.append(SpazioComportamentale.StatoComportamentale(nuova_lista_stati, nuova_lista_link, finale))
                                 # Costruisco l'arco tra i due stati dello spazio comportamentale
-                                arco_comportamentale.append(SpazioComportamentale.ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[len(stato_comportamentale) - 1], transizione.edge))
+                                arco_comportamentale.append(SpazioComportamentale.ArcoComportamentale(stato_comportamentale[i], stato_comportamentale[len(stato_comportamentale) - 1], transizione.edge, transizione.observability, transizione.relevance))
                                 lista_stati = nuova_lista_stati.copy()
                                 lista_link = nuova_lista_link.copy()
                                 i = SpazioComportamentale.StatoComportamentale.getPosStatoComportamentale(stato_comportamentale, lista_stati, lista_link)
@@ -291,4 +291,4 @@ for arco in arco_comportamentale_ridenominato:
         else:
             continue
 
-SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentaleRidenominato(arco_comportamentale_ridenominato, lista_transizioni, 'SpazioComportamentalePotatoRidenominato')
+SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentaleRidenominato(arco_comportamentale_ridenominato, 'SpazioComportamentalePotatoRidenominato')
