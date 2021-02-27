@@ -1,5 +1,6 @@
 from graphviz import Digraph
 
+
 class Automa:
     def __init__(self, name, states, edges, final_states):
         self.name = name
@@ -28,3 +29,16 @@ class Automa:
             fa.edge(nodo_partenza, nodo_destinazione, label=etichetta)
             i = i + 1
         fa.view()
+
+
+def importaAutomiDaFile(automi):
+    automa_file = open(".\Automa.txt", "r+")
+    contenuto = automa_file.read()
+    lista_automi = contenuto.split(" &\n")
+    for automa in lista_automi:
+        contenuto_automa = automa.split("\n")
+        nome_automa = contenuto_automa[0]
+        stati = contenuto_automa[1].split(",")
+        stati_finali = contenuto_automa[2].split(",")  # Possono non esserci
+        lati = contenuto_automa[3].split("|")
+        automi.append(Automa(nome_automa, stati, lati, stati_finali))
