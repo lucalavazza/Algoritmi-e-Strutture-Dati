@@ -1,50 +1,33 @@
-import SpazioComportamentale
-import Automa
-import Link
-import Transizione
+import tkinter as tk
 
 
-# Importazione degli automi da file
-automi = []
-Automa.importaAutomiDaFile(automi)
+def CaricaRete():
+    print("Faccio qualcosa")
 
-# Disegno degli automi
-for automa in automi:
-    automa.disegnaAutoma(automa.edges, automa.final_states)
+def SalvaRete():
+    print("Faccio qualcos'altro")
 
-# Importazione dei link
-links = []
-Link.importaLinkDaFile(links)
+window = tk.Tk()
+window.geometry("800x600")
+window.resizable(False, False)
+window.title("Pagina Principale - Algoritmi e Strutture Dati")
+window.configure(background = "#c4f7ff")
 
-# Disegno della topologia
-Link.Link.disegnaTopologia(links);
+istruzioniBase = "Questo programma aiuta nella creazione e visualizzazione di reti di automi finit.\n" \
+                 "Sarà possibile caricare automi già esistenti o caricare una rete di automi.\n In questo" \
+                 "caso si ricorda che è necessario anche avere la struttura dei link e le specifiche delle" \
+                 "transizioni."
 
-# Importazione delle transizioni
-lista_transizioni = []
-transizioni = []
-Transizione.importaTransizioniDaFile(lista_transizioni, transizioni)
 
-# Creazione dello spazio comportamentale
-lista_stati = []
-lista_link = []
-stato_comportamentale = []
-arco_comportamentale = []
-SpazioComportamentale.creaSpazioComportamentale(automi, transizioni, links, lista_stati, lista_link, lista_transizioni, stato_comportamentale, arco_comportamentale)
+etichettaAvvio = tk.Label(window, text = istruzioniBase, bg = "#c4f7ff", font = ("Helvetica", 16))
+etichettaAvvio.grid(row = 0, column = 1)
 
-# Disegno dello spazio comportamentale
-SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale, 'SpazioComportamentale')
+creaReteButton = tk.Button(text = "Crea una rete", command = CaricaRete)
+creaReteButton.grid(row = 1, column = 0)
+caricaReteButton = tk.Button(text = "Carica una rete", command = SalvaRete)
+caricaReteButton.grid(row = 1, column = 1)
 
-# Potatura
-SpazioComportamentale.Potatura(stato_comportamentale, arco_comportamentale)
 
-# Disegno dello spazio comportamentale potato
-SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale, 'SpazioComportamentalePotato')
+if __name__ == "__main__":
+    window.mainloop()
 
-# Ridenominazione
-stato_comportamentale_ridenominato = []
-arco_comportamentale_ridenominato = arco_comportamentale_ridenominato = arco_comportamentale.copy()
-finale = True
-SpazioComportamentale.Ridenomina(stato_comportamentale, stato_comportamentale_ridenominato, arco_comportamentale_ridenominato, finale)
-
-# Disegno dello spazio comportamentale ridenominato
-SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentaleRidenominato(arco_comportamentale_ridenominato, 'SpazioComportamentalePotatoRidenominato')
