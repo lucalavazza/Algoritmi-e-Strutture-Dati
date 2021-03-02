@@ -4,31 +4,37 @@ def CreaRete():
     print("Faccio qualcos'altro")
 
 
-
 def CaricaRete():
-    print("Faccio qualcosa")
+
+    def StampaFile():
+        if inputNomeFile.get():
+            fileDaCaricare = inputNomeFile.get()
+        else:
+            fileDaCaricare = "Nessun valore inserito!"
+        fileDaCaricare = fileDaCaricare + ".txt"
+        try:
+            with open(fileDaCaricare) as f:
+                print(f.read())
+        except Exception:
+            print("File non trovato")
+
+
     finestraCaricamento = tk.Toplevel(finestraPrincipale)
     finestraCaricamento.resizable(False, False)
+    finestraCaricamento.geometry("400x400")
     finestraCaricamento.title("Carica rete esistente")
     finestraCaricamento.configure(background = "white")
 
-    spazioTotaleFinestra = tk.Canvas(finestraCaricamento, width=400, height=300)
     inputNomeFile = tk.Entry(finestraCaricamento)
-    spazioTotaleFinestra.create_window(200, 140, window=inputNomeFile)
-    # valoreImmesso = inputNomeFile.get()
-    # labelValore = tk.Label(finestraCaricamento, text = valoreImmesso)
-    # spazioTotaleFinestra.create_window(200, 230, window = labelValore)
-    confermaCaricamentoReteButton = tk.Button(finestraCaricamento, text="Conferma nome rete")
-    spazioTotaleFinestra.create_window(200, 180, window = confermaCaricamentoReteButton)
+    inputNomeFile.grid(row = 0, column = 0)
+    confermaCaricamentoReteButton = tk.Button(finestraCaricamento, text="Conferma nome rete", command = StampaFile)
+    confermaCaricamentoReteButton.grid(row = 0, column = 1, padx = 10, pady = 10)
 
     indietroButton = tk.Button(finestraCaricamento, text = "Chiudi", command = finestraCaricamento.destroy)
-    spazioTotaleFinestra.create_window(200, 180, window = indietroButton)
+    indietroButton.grid(row = 2, pady = 10)
 
 
     finestraCaricamento.mainloop()
-
-
-
 
 
 finestraPrincipale = tk.Tk()
