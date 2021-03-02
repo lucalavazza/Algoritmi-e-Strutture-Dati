@@ -1,33 +1,58 @@
 import tkinter as tk
 
+def CreaRete():
+    print("Faccio qualcos'altro")
+
+
 
 def CaricaRete():
     print("Faccio qualcosa")
+    finestraCaricamento = tk.Toplevel(finestraPrincipale)
+    finestraCaricamento.resizable(False, False)
+    finestraCaricamento.title("Carica rete esistente")
+    finestraCaricamento.configure(background = "white")
 
-def SalvaRete():
-    print("Faccio qualcos'altro")
+    spazioTotaleFinestra = tk.Canvas(finestraCaricamento, width=400, height=300)
+    inputNomeFile = tk.Entry(finestraCaricamento)
+    spazioTotaleFinestra.create_window(200, 140, window=inputNomeFile)
+    # valoreImmesso = inputNomeFile.get()
+    # labelValore = tk.Label(finestraCaricamento, text = valoreImmesso)
+    # spazioTotaleFinestra.create_window(200, 230, window = labelValore)
+    confermaCaricamentoReteButton = tk.Button(finestraCaricamento, text="Conferma nome rete")
+    spazioTotaleFinestra.create_window(200, 180, window = confermaCaricamentoReteButton)
 
-window = tk.Tk()
-window.geometry("800x600")
-window.resizable(False, False)
-window.title("Pagina Principale - Algoritmi e Strutture Dati")
-window.configure(background = "#c4f7ff")
+    indietroButton = tk.Button(finestraCaricamento, text = "Chiudi", command = finestraCaricamento.destroy)
+    spazioTotaleFinestra.create_window(200, 180, window = indietroButton)
 
-istruzioniBase = "Questo programma aiuta nella creazione e visualizzazione di reti di automi finit.\n" \
+
+    finestraCaricamento.mainloop()
+
+
+
+
+
+finestraPrincipale = tk.Tk()
+finestraPrincipale.geometry("800x600")
+finestraPrincipale.resizable(False, False)
+finestraPrincipale.title("Pagina Principale - Algoritmi e Strutture Dati")
+finestraPrincipale.configure(background ="white")
+
+istruzioniBase = "Questo programma aiuta nella creazione e visualizzazione di reti di automi finiti.\n" \
                  "Sarà possibile caricare automi già esistenti o caricare una rete di automi.\n In questo" \
                  "caso si ricorda che è necessario anche avere la struttura dei link e le specifiche delle" \
-                 "transizioni."
+                 "transsizioni."
 
 
-etichettaAvvio = tk.Label(window, text = istruzioniBase, bg = "#c4f7ff", font = ("Helvetica", 16))
-etichettaAvvio.grid(row = 0, column = 1)
+etichettaAvvio = tk.Label(finestraPrincipale, text = istruzioniBase, bg ="white", font = ("Helvetica", 10))
+etichettaAvvio.pack()
 
-creaReteButton = tk.Button(text = "Crea una rete", command = CaricaRete)
-creaReteButton.grid(row = 1, column = 0)
-caricaReteButton = tk.Button(text = "Carica una rete", command = SalvaRete)
-caricaReteButton.grid(row = 1, column = 1)
+creaReteButton = tk.Button(finestraPrincipale, text = "Crea una rete", command = CreaRete)
+creaReteButton.pack()
+caricaReteButton = tk.Button(finestraPrincipale, text = "Carica una rete", command = CaricaRete)
+caricaReteButton.pack()
+
+chiudiButton = tk.Button(finestraPrincipale, text = "Esci", command = finestraPrincipale.destroy).pack()
 
 
-if __name__ == "__main__":
-    window.mainloop()
+finestraPrincipale.mainloop()
 
