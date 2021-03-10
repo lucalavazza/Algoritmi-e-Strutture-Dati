@@ -8,8 +8,8 @@ class Transizione:
         self.relevance = relevance
 
 
-def importaTransizioniDaFile(lista_transizioni, transizioni):
-    transizioni_file = open("Transizioni.txt", "r+")
+def importaTransizioniDaFile(lista_transizioni, transizioni, transizioniFile):
+    transizioni_file = open(transizioniFile, "r+")
     contenuto = transizioni_file.read()
     split_transizioni = contenuto.split("\n")
     transizioni.extend(split_transizioni)

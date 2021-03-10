@@ -19,8 +19,8 @@ class Link:
         topologia.view()
 
 
-def importaLinkDaFile(links):
-    link_file = open("Link.txt", "r+")
+def importaLinkDaFile(links, linkFile):
+    link_file = open(linkFile, "r+")
     contenuto = link_file.read()
     lista_link_inseriti = contenuto.split("\n")
     for link in lista_link_inseriti:

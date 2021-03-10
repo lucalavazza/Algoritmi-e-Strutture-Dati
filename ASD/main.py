@@ -1,48 +1,133 @@
 import tkinter as tk
+import sys
 from datetime import datetime
 
+import Automa
+import Link
+import Transizione
+import SpazioComportamentale
+
 def CreaRete():
-    """
-    Quello che dobbiamo fare:
-        - consentire la creazione dei tre tipi di file
-            -- effettuare dei crontrolli sulla formattazione degli stessi
-        - nel caso nella cartella del programma ce ne siano già almeno uno per tipo, dare la possibilità di spostarsi
-          in CaricaRete per effettuare le operazioni necessarie
-    """
-    def CreaAutoma():
-        automa = open("./Automa_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".txt", "w")
-        """
-        E poi? 
-        L'interazione con l'utente la facciamo in una finestra grafica, oppure nella console (tipo la primissima versione ancora su Colab)?
-        """
 
-    def CreaLink():
-        print("Creo link...")
+    # Questo metodo cambia lo stato del bottone crea. Serve che i campi siano pieni per renderlo attivo
+    def cambiaStatoBottone(*_):
+        if inputAutoma.var.get() and inputLink.var.get() and inputTransizioni.var.get() and inputNomeRete.var.get():
+            creaReteButton['state'] = 'normal'
+        else:
+            creaReteButton['state'] = 'disabled'
 
-    def CreaTransizioni():
-        print("Creo transizioni...")
+    # Questo metodo fa dei controlli sui file per vedere se esistono
+    # Per ora se un file non esiste il programma viene chiuso, poi magari sistemiamo diversamente
+    def confermaCreazione():
+        #Caricamento Automa
+        AutomaDaCaricare = inputAutoma.get()
+        AutomaDaCaricare = AutomaDaCaricare + ".txt"
+        try:
+            with open(AutomaDaCaricare) as f:
+                print(f.read())
+        except Exception:
+            print("File Automa non trovato")
+            sys.exit(1)
+        #Caricamento Link
+        LinkDaCaricare = inputLink.get()
+        LinkDaCaricare = LinkDaCaricare + ".txt"
+        try:
+            with open(LinkDaCaricare) as f:
+                print(f.read())
+        except Exception:
+            print("File Link non trovato")
+            sys.exit(1)
+        #Caricamento Transizioni
+        TransizioniDaCaricare = inputTransizioni.get()
+        TransizioniDaCaricare = TransizioniDaCaricare + ".txt"
+        try:
+            with open(TransizioniDaCaricare) as f:
+                print(f.read())
+        except Exception:
+            print("File Transizioni non trovato")
+            sys.exit(1)
+        importaFile(AutomaDaCaricare, LinkDaCaricare, TransizioniDaCaricare)
+
+    def importaFile(AutomaDaCaricare, LinkDaCaricare, TransizioniDaCaricare):
+        automi = []
+        Automa.importaAutomiDaFile(automi, AutomaDaCaricare)
+        # Disegno degli automi
+        for automa in automi:
+            automa.disegnaAutoma(automa.edges, automa.final_states)
+        # Importazione dei link
+        links = []
+        Link.importaLinkDaFile(links, LinkDaCaricare)
+        # Disegno della topologia
+        Link.Link.disegnaTopologia(links);
+        # Importazione delle transizioni
+        lista_transizioni = []
+        transizioni = []
+        Transizione.importaTransizioniDaFile(lista_transizioni, transizioni, TransizioniDaCaricare)
+
+        # Creazione dello spazio comportamentale
+        lista_stati = []
+        lista_link = []
+        stato_comportamentale = []
+        arco_comportamentale = []
+        SpazioComportamentale.creaSpazioComportamentale(automi, transizioni, links, lista_stati, lista_link,
+                                                        lista_transizioni, stato_comportamentale, arco_comportamentale)
+        # Disegno dello spazio comportamentale
+        SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale,
+                                                                               inputNomeRete)
+        # Potatura
+        SpazioComportamentale.Potatura(stato_comportamentale, arco_comportamentale)
+
+        # Disegno dello spazio comportamentale potato
+        nomeRetePotata = inputNomeRete + "Potato"
+        SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale,
+                                                                               nomeRetePotata)
 
     finestraCreazione = tk.Toplevel(finestraPrincipale)
     finestraCreazione.resizable(False, False)
     finestraCreazione.title("Crea una nuova rete")
     finestraCreazione.configure(background="white")
 
-    indicazioniCreazione = "Sceglere cosa creare"
+    indicazioniCreazione = "Menu creazione rete - Inserire i nomi dei file txt per importarli"
     etichettaAvvioCreazione = tk.Label(finestraCreazione, text=indicazioniCreazione, bg="white", font=("Helvetica", 10))
     etichettaAvvioCreazione.grid(row=0, column=1)
 
-    creaAutomaButton = tk.Button(finestraCreazione, text="Crea un nuovo automa", command=CreaAutoma)
-    creaAutomaButton.grid(row = 2, column = 0, padx = 10, pady = 10)
-    # Non so ancora come/se si può fare, ma sarebbe il caso di disabilitarlo nel caso non esista almeno un automa
-    creaLinkButton = tk.Button(finestraCreazione, text="Crea link tra automi", command=CreaLink)
-    creaLinkButton.grid(row = 2, column = 1, padx = 10, pady = 10)
-    # Le transizioni sono particolarmente delicate... devono effettivamente esistere negli automi. E come sopra, abilitazione.
-    # Sempre che abbia senso crearle a mano... Forse è meglio leggerle e far inserire all'utente solo gli eventi e le etichette di osservabilità e rilevanza.
-    creaTransizioniButton = tk.Button(finestraCreazione, text="Crea delle transizioni", command=CreaTransizioni)
-    creaTransizioniButton.grid(row=2, column=3, padx=10, pady=10)
+    labelAutoma = tk.Label(finestraCreazione, text="Automa")
+    labelAutoma.grid(row=1, column=0)
+    inputAutoma = tk.Entry(finestraCreazione)
+    inputAutoma.grid(row=2, column=0)
+    inputAutoma.var = tk.StringVar()
+    inputAutoma['textvariable'] = inputAutoma.var
+    inputAutoma.var.trace_add('write', cambiaStatoBottone)
 
-    indietroButton = tk.Button(finestraCreazione, text="Chiudi", command=finestraCreazione.destroy)
-    indietroButton.grid(row = 4, column=1, padx = 10, pady = 10)
+    labelLink = tk.Label(finestraCreazione, text="Link")
+    labelLink.grid(row=1, column=1)
+    inputLink = tk.Entry(finestraCreazione)
+    inputLink.grid(row=2, column=1)
+    inputLink.var = tk.StringVar()
+    inputLink['textvariable'] = inputLink.var
+    inputLink.var.trace_add('write', cambiaStatoBottone)
+
+    labelTransizioni = tk.Label(finestraCreazione, text="Transizioni")
+    labelTransizioni.grid(row=1, column=2)
+    inputTransizioni = tk.Entry(finestraCreazione)
+    inputTransizioni.grid(row=2, column=2)
+    inputTransizioni.var = tk.StringVar()
+    inputTransizioni['textvariable'] = inputTransizioni.var
+    inputTransizioni.var.trace_add('write', cambiaStatoBottone)
+
+    labelNomeRete = tk.Label(finestraCreazione, text="Nome Rete")
+    labelNomeRete.grid(row=3, column=0)
+    inputNomeRete = tk.Entry(finestraCreazione)
+    inputNomeRete.grid(row=3, column=1)
+    inputNomeRete.var = tk.StringVar()
+    inputNomeRete['textvariable'] = inputNomeRete.var
+    inputNomeRete.var.trace_add('write', cambiaStatoBottone)
+
+    creaReteButton = tk.Button(finestraCreazione, text="Crea", command = confermaCreazione, stat='disabled')
+    creaReteButton.grid(row=4, column=1, padx=10, pady=10)
+
+    indietroButton = tk.Button(finestraCreazione, text="Chiudi", command = finestraCreazione.destroy)
+    indietroButton.grid(row = 5, column=1, padx = 10, pady = 10)
 
     finestraCreazione.mainloop()
 

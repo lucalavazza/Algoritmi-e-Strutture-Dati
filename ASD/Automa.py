@@ -31,8 +31,8 @@ class Automa:
         fa.view()
 
 
-def importaAutomiDaFile(automi):
-    automa_file = open(".\Automa.txt", "r+")
+def importaAutomiDaFile(automi, automaFile):
+    automa_file = open(automaFile, "r+")
     contenuto = automa_file.read()
     lista_automi = contenuto.split(" &\n")
     for automa in lista_automi:
