@@ -9,7 +9,7 @@ class Transizione:
 
 
 def importaTransizioniDaFile(lista_transizioni, transizioni, transizioniFile):
-    transizioni_file = open(transizioniFile, "r+")
+    transizioni_file = open(transizioniFile, "r+", encoding='utf-8')
     contenuto = transizioni_file.read()
     split_transizioni = contenuto.split("\n")
     transizioni.extend(split_transizioni)

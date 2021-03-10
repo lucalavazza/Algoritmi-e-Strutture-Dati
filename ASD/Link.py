@@ -20,7 +20,7 @@ class Link:
 
 
 def importaLinkDaFile(links, linkFile):
-    link_file = open(linkFile, "r+")
+    link_file = open(linkFile, "r+", encoding='utf-8')
     contenuto = link_file.read()
     lista_link_inseriti = contenuto.split("\n")
     for link in lista_link_inseriti:

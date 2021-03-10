@@ -1,6 +1,5 @@
 from graphviz import Digraph
 
-
 class StatoComportamentale:
     def __init__(self, listaStati, listaLink, finale):
         self.listaStati = listaStati
@@ -58,6 +57,20 @@ class ArcoComportamentale:
             if partenza == statoPartenza and arrivo == statoDestinazione and v.etichetta == etichetta:
                 return True
         return False
+
+    def salvaSpazioComportamentale(self, titolo):
+        try:
+            fileSpazio = open(titolo+".txt", "x", encoding='utf-8')
+            for arco in self:
+                statoPartenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink')
+                statoPartenza = " ".join(statoPartenza)
+                statoDestinazione = getattr(arco.statoDestinazione, 'listaStati') + getattr(arco.statoDestinazione, 'listaLink')
+                statoDestinazione = " ".join(statoDestinazione)
+                fileSpazio.write(statoPartenza + ";" + statoDestinazione + ";" + arco.etichetta + ";" + arco.relevance + ";" + arco.observability + "\n")
+            fileSpazio.close()
+            return 0
+        except IOError:
+            return 1
 
     def disegnaSpazioComportamentale(self, titolo):
         spazio_comportamentale = Digraph(titolo, filename=""+titolo+".gv")

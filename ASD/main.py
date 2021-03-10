@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.messagebox as tkMsg
 import sys
 from datetime import datetime
 
@@ -22,11 +23,13 @@ def CreaRete():
         #Caricamento Automa
         AutomaDaCaricare = inputAutoma.get()
         AutomaDaCaricare = AutomaDaCaricare + ".txt"
+        error = True
         try:
             with open(AutomaDaCaricare) as f:
                 print(f.read())
         except Exception:
-            print("File Automa non trovato")
+            tkMsg.showerror(title="Errore", message="Il file degli automi inserito non è stato trovato")
+            error = True
             sys.exit(1)
         #Caricamento Link
         LinkDaCaricare = inputLink.get()
@@ -35,7 +38,8 @@ def CreaRete():
             with open(LinkDaCaricare) as f:
                 print(f.read())
         except Exception:
-            print("File Link non trovato")
+            tkMsg.showerror(title="Errore", message="Il file dei link inserito non è stato trovato")
+            error = True
             sys.exit(1)
         #Caricamento Transizioni
         TransizioniDaCaricare = inputTransizioni.get()
@@ -44,9 +48,23 @@ def CreaRete():
             with open(TransizioniDaCaricare) as f:
                 print(f.read())
         except Exception:
-            print("File Transizioni non trovato")
+            tkMsg.showerror(title="Errore", message="Il file delle transizioni inserito non è stato trovato")
+            error = True
             sys.exit(1)
-        importaFile(AutomaDaCaricare, LinkDaCaricare, TransizioniDaCaricare)
+        try:
+            with open(inputNomeRete.get()) as f:
+                print(f.read())
+            tkMsg.showerror(title="Errore", message="Il nome inserito esiste già, inserirne un altro")
+            error = True
+        except Exception:
+            print("Il file non esiste ancora, ottimo!")
+
+        if error:
+            error = False
+            tkMsg.showinfo(title="Suggerimento", message="Riprova ad inserire i nomi")
+        else:
+            importaFile(AutomaDaCaricare, LinkDaCaricare, TransizioniDaCaricare)
+
 
     def importaFile(AutomaDaCaricare, LinkDaCaricare, TransizioniDaCaricare):
         automi = []
@@ -71,16 +89,21 @@ def CreaRete():
         arco_comportamentale = []
         SpazioComportamentale.creaSpazioComportamentale(automi, transizioni, links, lista_stati, lista_link,
                                                         lista_transizioni, stato_comportamentale, arco_comportamentale)
+
         # Disegno dello spazio comportamentale
         SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale,
-                                                                               inputNomeRete)
+                                                                               inputNomeRete.get())
         # Potatura
         SpazioComportamentale.Potatura(stato_comportamentale, arco_comportamentale)
-
-        # Disegno dello spazio comportamentale potato
-        nomeRetePotata = inputNomeRete + "Potato"
-        SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale,
-                                                                               nomeRetePotata)
+        # Salvataggio su txt dello spazio comportamentale
+        num = SpazioComportamentale.ArcoComportamentale.salvaSpazioComportamentale(arco_comportamentale, inputNomeRete.get())
+        if num == 0:
+            # Disegno dello spazio comportamentale potato
+            nomeRetePotata = inputNomeRete.get() + "Potato"
+            SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale,
+                                                                                   nomeRetePotata)
+        else:
+            tkMsg.showerror(title="Errore", message="Il nome del file che hai inserito esiste già")
 
     finestraCreazione = tk.Toplevel(finestraPrincipale)
     finestraCreazione.resizable(False, False)

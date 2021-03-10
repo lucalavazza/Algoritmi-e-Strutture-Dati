@@ -32,7 +32,7 @@ class Automa:
 
 
 def importaAutomiDaFile(automi, automaFile):
-    automa_file = open(automaFile, "r+")
+    automa_file = open(automaFile, "r+", encoding='utf-8')
     contenuto = automa_file.read()
     lista_automi = contenuto.split(" &\n")
     for automa in lista_automi:
@@ -43,5 +43,5 @@ def importaAutomiDaFile(automi, automaFile):
         lati = contenuto_automa[3].split("|")
         automi.append(Automa(nome_automa, stati, lati, stati_finali))
         # richiesta a pagina 107 del pdf, nella sezione "Requisiti funzionali"
-        print("Numero di stati dell'automa ", nome_automa, ": ", len(stati)+len(stati_finali))
-        print("Numero di transizioni dell'automa ", nome_automa, ": ", len(lati))
+        # print("Numero di stati dell'automa ", nome_automa, ": ", len(stati)+len(stati_finali))
+        # print("Numero di transizioni dell'automa ", nome_automa, ": ", len(lati))
