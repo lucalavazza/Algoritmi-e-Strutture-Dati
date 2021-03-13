@@ -58,9 +58,10 @@ class ArcoComportamentale:
                 return True
         return False
 
-    def salvaSpazioComportamentale(self, titolo):
+    def salvaSpazioComportamentale(self, titoloRete, fileAutoma, fileLink, fileTransizione):
         try:
-            fileSpazio = open(titolo+".txt", "x", encoding='utf-8')
+            fileSpazio = open(titoloRete+".txt", "x", encoding='utf-8')
+            fileSpazio.write(fileAutoma + ";" + fileLink + ";" + fileTransizione + "\n")
             for arco in self:
                 statoPartenza = getattr(arco.statoPartenza, 'listaStati') + getattr(arco.statoPartenza, 'listaLink')
                 statoPartenza = " ".join(statoPartenza)
@@ -71,6 +72,11 @@ class ArcoComportamentale:
             return 0
         except IOError:
             return 1
+
+    def disegnaSpazioComportamentaleDaFile(self, titolo):
+        spazio_comportamentale = Digraph(titolo, filename=""+titolo+".gv")
+        spazio_comportamentale.attr(rankdir="LR", size="8.5")
+        spazio_comportamentale.attr("node", shape="circle")
 
     def disegnaSpazioComportamentale(self, titolo):
         spazio_comportamentale = Digraph(titolo, filename=""+titolo+".gv")
@@ -397,3 +403,4 @@ def Ridenomina(stato_comportamentale, stato_comportamentale_ridenominato, arco_c
                 arco.statoDestinazione = stato
             else:
                 continue
+

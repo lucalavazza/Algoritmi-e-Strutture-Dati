@@ -23,13 +23,13 @@ lista_transizioni = []
 transizioni = []
 Transizione.importaTransizioniDaFile(lista_transizioni, transizioni)
 
+
 # Creazione dello spazio comportamentale
 lista_stati = []
 lista_link = []
 stato_comportamentale = []
 arco_comportamentale = []
 SpazioComportamentale.creaSpazioComportamentale(automi, transizioni, links, lista_stati, lista_link, lista_transizioni, stato_comportamentale, arco_comportamentale)
-
 # Disegno dello spazio comportamentale
 SpazioComportamentale.ArcoComportamentale.disegnaSpazioComportamentale(arco_comportamentale, 'SpazioComportamentale')
 

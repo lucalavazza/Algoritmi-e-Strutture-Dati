@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox as tkMsg
 import sys
+import json
 from datetime import datetime
 
 import Automa
@@ -23,7 +24,7 @@ def CreaRete():
         #Caricamento Automa
         AutomaDaCaricare = inputAutoma.get()
         AutomaDaCaricare = AutomaDaCaricare + ".txt"
-        error = True
+        error = False
         try:
             with open(AutomaDaCaricare) as f:
                 print(f.read())
@@ -96,7 +97,9 @@ def CreaRete():
         # Potatura
         SpazioComportamentale.Potatura(stato_comportamentale, arco_comportamentale)
         # Salvataggio su txt dello spazio comportamentale
-        num = SpazioComportamentale.ArcoComportamentale.salvaSpazioComportamentale(arco_comportamentale, inputNomeRete.get())
+        num = SpazioComportamentale.ArcoComportamentale.salvaSpazioComportamentale(arco_comportamentale, inputNomeRete.get(),
+                                                                                   inputAutoma.get(), inputLink.get(),
+                                                                                   inputTransizioni.get())
         if num == 0:
             # Disegno dello spazio comportamentale potato
             nomeRetePotata = inputNomeRete.get() + "Potato"
@@ -164,7 +167,23 @@ def CaricaRete():
           -- stampare automi, topologia, spazio comportamentale, ecc
       - permettere di tornare indietro per fare qualcosa di diverso e/o cambiare file
     """
-    def StampaFile():
+    def importaFile(AutomaDaCaricare, LinkDaCaricare, TransizioniDaCaricare):
+        automi = []
+        Automa.importaAutomiDaFile(automi, AutomaDaCaricare)
+        # Disegno degli automi
+        for automa in automi:
+            automa.disegnaAutoma(automa.edges, automa.final_states)
+        # Importazione dei link
+        links = []
+        Link.importaLinkDaFile(links, LinkDaCaricare)
+        # Disegno della topologia
+        Link.Link.disegnaTopologia(links);
+        # Importazione delle transizioni
+        lista_transizioni = []
+        transizioni = []
+        Transizione.importaTransizioniDaFile(lista_transizioni, transizioni, TransizioniDaCaricare)
+
+    def CaricaFile():
         if inputNomeFile.get():
             fileDaCaricare = inputNomeFile.get()
         else:
@@ -172,19 +191,43 @@ def CaricaRete():
         fileDaCaricare = fileDaCaricare + ".txt"
         try:
             with open(fileDaCaricare) as f:
-                print(f.read())
+                contenuto = f.readline().split(";")
+                # aggiungo l'estensione txt al nome del file
+                AutomaDaCaricare = contenuto[0] + ".txt"
+                try:
+                    with open(AutomaDaCaricare) as f:
+                        pass
+                except Exception:
+                    tkMsg.showerror(title="Errore",
+                                    message="Il file degli automi di questo spazio comportamentale non è stato trovato")
+                LinkDaCaricare = contenuto[1] + ".txt"
+                try:
+                    with open(LinkDaCaricare) as f:
+                        pass
+                except Exception:
+                    tkMsg.showerror(title="Errore",
+                                    message="Il file dei link di questo spazio comportamentale non è stato trovato")
+                TransizioniDaCaricare = contenuto[2] + ".txt"
+                try:
+                    with open(TransizioniDaCaricare) as f:
+                        pass
+                except Exception:
+                    tkMsg.showerror(title="Errore",
+                                    message="Il file delle transizioni di questo spazio comportamentale non è stato trovato")
+                importaFile(AutomaDaCaricare, LinkDaCaricare, TransizioniDaCaricare)
+                # leggo tutte le righe del file degli spazi comportamentali
+                contenuto = f.read().split("\n")
         except Exception:
             print("File non trovato")
 
     finestraCaricamento = tk.Toplevel(finestraPrincipale)
     finestraCaricamento.resizable(False, False)
-    #finestraCaricamento.geometry("400x400")
     finestraCaricamento.title("Carica rete esistente")
     finestraCaricamento.configure(background = "white")
 
     inputNomeFile = tk.Entry(finestraCaricamento)
     inputNomeFile.grid(row = 0, column = 0)
-    confermaCaricamentoReteButton = tk.Button(finestraCaricamento, text="Conferma nome rete", command = StampaFile)
+    confermaCaricamentoReteButton = tk.Button(finestraCaricamento, text="Conferma nome rete", command = CaricaFile)
     confermaCaricamentoReteButton.grid(row = 0, column = 1, padx = 10, pady = 10)
 
     indietroButton = tk.Button(finestraCaricamento, text = "Chiudi", command = finestraCaricamento.destroy)
